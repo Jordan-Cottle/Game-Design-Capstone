@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b90a4967432a334282adf5be6488e1d, type: 3}
+  m_Name: StarTileData
+  m_EditorClassIdentifier: Assembly-CSharp::TileData
+  tiles:
+  - {fileID: 11400000, guid: 47453bdc160522845a5b7bd82c7edb9c, type: 2}
+  - {fileID: 11400000, guid: d45849ab2d738274b89d0e5af0ef4ddc, type: 2}
+  - {fileID: 11400000, guid: 86147ee018a689b4182f6e9b363bf301, type: 2}
+  terrainType: 3
