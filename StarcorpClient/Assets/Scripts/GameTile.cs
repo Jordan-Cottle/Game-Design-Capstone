@@ -65,9 +65,13 @@ public class GameTile
     public Position position;
     public int terrainType;
 
+    public int clickedCount;
+
     public GameTile(Position position, int terrainType)
     {
         this.position = position;
         this.terrainType = terrainType;
+
+        this.clickedCount = 0;
     }
 }

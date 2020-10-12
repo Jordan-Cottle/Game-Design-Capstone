@@ -58,6 +58,10 @@ public class HexGrid : MonoBehaviour
             Debug.Log($"Found {found} at ({row}, {col})");
         }
 
+        found.clickedCount += 1;
+
+        Debug.Log($"{found} clicked {found.clickedCount} times!");
+
         return found;
     }
 }
