@@ -2,8 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Transform))]
 public class PlayerController : MonoBehaviour
 {
+    private Transform playerTransform;
     private Camera mainCamera;
     private HexGrid gameGrid;
 
@@ -14,7 +16,9 @@ public class PlayerController : MonoBehaviour
     {
         this.mainCamera = Camera.main;
 
-        gameGrid = (HexGrid)FindObjectOfType(typeof(HexGrid));
+        this.gameGrid = (HexGrid)FindObjectOfType(typeof(HexGrid));
+
+        this.playerTransform = GetComponent<Transform>();
     }
 
     // Update is called once per frame
