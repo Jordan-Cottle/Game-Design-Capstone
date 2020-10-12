@@ -74,4 +74,9 @@ public class GameTile
 
         this.clickedCount = 0;
     }
+
+    override public string ToString()
+    {
+        return $"{TileData.TYPES[this.terrainType]} {this.position}: {this.clickedCount}";
+    }
 }
