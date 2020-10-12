@@ -49,7 +49,7 @@ public class HexGrid : MonoBehaviour
         if (!this.tiles.ContainsKey(pos))
         {
             Debug.Log($"No tile currently tracked at: ({row}, {col})");
-            found = new GameTile(new Position(row, col), 0);
+            found = new GameTile(new Position(row, col), data.terrainType);
             this.tiles[pos] = found;
         }
         else
@@ -59,8 +59,6 @@ public class HexGrid : MonoBehaviour
         }
 
         found.clickedCount += 1;
-
-        Debug.Log($"{found} clicked {found.clickedCount} times!");
 
         return found;
     }
