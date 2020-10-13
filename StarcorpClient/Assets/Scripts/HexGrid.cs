@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -32,34 +32,45 @@ public class HexGrid : MonoBehaviour
         }
     }
 
+    public TerrainType terrainType(GameTile tile)
+    {
+        TileBase tileBase = this.grid.GetTile(tile.cellPosition);
+        TileData data = this.tileTypeData[tileBase];
+
+        return data.terrainType;
+    }
+
     public GameTile getTile(Vector3 worldPosition)
     {
         Vector3Int coordinate = grid.WorldToCell(worldPosition);
         int row = coordinate.y;
         int col = coordinate.x;
 
-        TileBase tile = grid.GetTile(coordinate);
-        TileData data = this.tileTypeData[tile];
+        Position pos = new Position(coordinate);
 
+        return this.getTile(pos);
+    }
 
-        Position pos = new Position(row, col);
-        print($"{tile} at {pos} is a {data.type}");
-
+    public GameTile getTile(Position pos)
+    {
         GameTile found;
         if (!this.tiles.ContainsKey(pos))
         {
-            Debug.Log($"No tile currently tracked at: ({row}, {col})");
-            found = new GameTile(new Position(row, col), data.terrainType);
+            found = new GameTile(pos, this);
             this.tiles[pos] = found;
         }
         else
         {
             found = this.tiles[pos];
-            Debug.Log($"Found {found} at ({row}, {col})");
         }
 
         found.clickedCount += 1;
 
         return found;
+    }
+
+    public Vector3 getWorldPosition(GameTile tile)
+    {
+        return this.grid.CellToWorld(tile.cellPosition);
     }
 }
