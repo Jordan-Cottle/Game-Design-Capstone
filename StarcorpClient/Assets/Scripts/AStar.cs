@@ -34,6 +34,11 @@ class Node
         return this.tile == other.tile;
     }
 
+    public override int GetHashCode()
+    {
+        return this.tile.GetHashCode();
+    }
+
     public static bool operator ==(Node a, Node b)
     {
         return a.tile == b.tile;
