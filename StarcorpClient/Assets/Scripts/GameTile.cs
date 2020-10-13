@@ -1,60 +1,90 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
 /*
-    Represent the hexagonal grid as axial coordinates
-
-    Rows are indexed by the X coordinate
-
-    Columns are indexed by the Y coordinate
-
-    When needed, the third axial coordinate Z is calculated by
-        Z = -X - Y
+    Represent the hexagonal grid as cube coordinates
 */
 public struct Position
 {
+
     public int x;
     public int y;
+    public int z;
 
-    public int z
+    public Vector3Int cellPosition
     {
-        get => -1 * (this.x + this.y);
+        get
+        {
+            int col = this.x + (this.z - (this.z & 1)) / 2;
+            int row = this.z;
+            return new Vector3Int(col, row, 0);
+        }
     }
 
-    public int row
+    public Position(Vector3Int gridPos)
     {
-        get => x;
+        this.x = gridPos.x - (gridPos.y - (gridPos.y & 1)) / 2;
+        this.z = gridPos.y;
+        this.y = -x - z;
     }
 
-    public int col
+    public Position cubeOffset(int x, int y, int z)
     {
-        get => y;
-    }
+        Position pos = new Position(this.cellPosition);
 
-    public Position(int x, int y)
-    {
-        this.x = x;
-        this.y = y;
-    }
+        pos.x += x;
+        pos.y += y;
+        pos.z += z;
 
-    public Position[] neighbors
+        return pos;
+    }
+    public List<Position> neighbors
     {
-        get => new Position[] {
-            new Position(this.x, this.y - 1),
-            new Position(this.x+1, this.y - 1),
-            new Position(this.x+1, this.y),
-            new Position(this.x, this.y + 1),
-            new Position(this.x-1, this.y + 1),
-            new Position(this.x-1, this.y),
+        get => new List<Position> {
+            this.cubeOffset(1, -1, 0),
+            this.cubeOffset(1, 0, -1),
+            this.cubeOffset(0, 1, -1),
+            this.cubeOffset(-1, 1, 0),
+            this.cubeOffset(-1, 0, 1),
+            this.cubeOffset(0, -1, 1),
         };
+    }
+
+    public static bool operator ==(Position a, Position b)
+    {
+        return a.x == b.x && a.y == b.y && a.z == b.z;
+    }
+
+    public static bool operator !=(Position a, Position b)
+    {
+        return !(a == b);
     }
 
     public override string ToString()
     {
-        return $"({this.x}, {this.y})";
+        return $"({this.x}, {this.y}, {this.z})";
     }
+
+    public override bool Equals(object obj)
+    {
+        if (obj is null)
+        {
+            return false;
+        }
+
+        Position other = (Position)obj;
+
+        return this == other;
+    }
+
+    public override int GetHashCode()
+    {
+        return this.x << 16 | this.y;
+    }
+
 }
 
 /*
@@ -63,16 +93,80 @@ public struct Position
 public class GameTile
 {
     public Position position;
-    public int terrainType;
 
     public int clickedCount;
 
-    public GameTile(Position position, int terrainType)
+    public HexGrid map;
+
+    public GameTile(Position position, HexGrid parent)
     {
         this.position = position;
-        this.terrainType = terrainType;
-
         this.clickedCount = 0;
+
+        this.map = parent;
+    }
+    public TerrainType terrainType
+    {
+        get => this.map.terrainType(this);
+    }
+
+    public int movementCost
+    {
+        get => this.terrainType.movementCost();
+    }
+
+    public Vector3Int cellPosition
+    {
+        get => this.position.cellPosition;
+    }
+
+    public static bool operator ==(GameTile a, GameTile b)
+    {
+        return a.position == b.position;
+    }
+
+    public static bool operator !=(GameTile a, GameTile b)
+    {
+        return a.position != b.position;
+    }
+
+    public override bool Equals(object obj)
+    {
+        GameTile other = obj as GameTile;
+        if (other is null)
+            return false;
+
+        return this.position == other.position;
+    }
+
+    public override int GetHashCode()
+    {
+        return this.position.GetHashCode();
+    }
+
+    public int CompareTo(object obj)
+    {
+        GameTile other = obj as GameTile;
+        if (other is null)
+            throw new ArgumentException("Cannot compare GameTile to null");
+
+        return this.movementCost.CompareTo(other.movementCost);
+
+    }
+
+    public static bool operator <(GameTile a, GameTile b)
+    {
+        return a.terrainType.movementCost() < b.terrainType.movementCost();
+    }
+
+    public static bool operator >(GameTile a, GameTile b)
+    {
+        return a.terrainType.movementCost() > b.terrainType.movementCost();
+    }
+
+    override public string ToString()
+    {
+        return $"{this.terrainType.name()} {this.position}: {this.clickedCount}";
     }
 
     override public string ToString()

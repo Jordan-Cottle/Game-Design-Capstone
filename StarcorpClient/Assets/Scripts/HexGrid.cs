@@ -2,20 +2,27 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(Tilemap))]
 public class HexGrid : MonoBehaviour
 {
     private Tilemap grid;
     private Dictionary<Position, GameTile> tiles;
+    private Dictionary<Position, Text> labels;
 
     [SerializeField]
     private TileData[] tileTypes;
+
+    public Canvas canvas;
+    public Text textPrefab;
+    private int foundCounter = 0;
 
     private Dictionary<TileBase, TileData> tileTypeData;
     void Start()
     {
         this.tiles = new Dictionary<Position, GameTile>();
+        this.labels = new Dictionary<Position, Text>();
 
         this.grid = this.GetComponent<Tilemap>();
     }
@@ -32,34 +39,111 @@ public class HexGrid : MonoBehaviour
         }
     }
 
+    void Update()
+    {
+        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+        Vector3Int cellPosition = this.grid.WorldToCell(worldPosition);
+
+        worldPosition.z = 0;
+
+        Position pos = new Position(cellPosition);
+        if (!this.labels.ContainsKey(pos))
+        {
+            Debug.Log($"Cell position: ({cellPosition.x}, {cellPosition.y})::{worldPosition}");
+            Text label = Instantiate(textPrefab, this.grid.CellToWorld(cellPosition), Quaternion.identity, this.canvas.transform);
+            label.text = $"({cellPosition.x}, {cellPosition.y})\n {pos}";
+            this.labels[pos] = label;
+        }
+    }
+
+    public TerrainType terrainType(GameTile tile)
+    {
+        TileBase tileBase = this.grid.GetTile(tile.cellPosition);
+
+        if (tileBase is null)
+        {
+            return TerrainType.Space;
+        }
+
+        TileData data = this.tileTypeData[tileBase];
+
+        return data.terrainType;
+    }
+
     public GameTile getTile(Vector3 worldPosition)
     {
         Vector3Int coordinate = grid.WorldToCell(worldPosition);
-        int row = coordinate.y;
-        int col = coordinate.x;
 
-        TileBase tile = grid.GetTile(coordinate);
-        TileData data = this.tileTypeData[tile];
+        Position pos = new Position(coordinate);
 
+        return this.getTile(pos);
+    }
 
-        Position pos = new Position(row, col);
-        print($"{tile} at {pos} is a {data.type}");
-
+    public GameTile getTile(Position pos)
+    {
         GameTile found;
         if (!this.tiles.ContainsKey(pos))
         {
-            Debug.Log($"No tile currently tracked at: ({row}, {col})");
-            found = new GameTile(new Position(row, col), data.terrainType);
+
+            found = new GameTile(pos, this);
             this.tiles[pos] = found;
         }
         else
         {
             found = this.tiles[pos];
-            Debug.Log($"Found {found} at ({row}, {col})");
         }
 
         found.clickedCount += 1;
 
         return found;
+    }
+
+    public Text getLabel(GameTile tile)
+    {
+        Text label;
+        if (!this.labels.ContainsKey(tile.position))
+        {
+            label = Instantiate(textPrefab, this.getWorldPosition(tile), Quaternion.identity, this.canvas.transform);
+            label.text = $"{this.foundCounter++}: {tile.position}\n{tile.cellPosition}";
+            this.labels[tile.position] = label;
+        }
+        else
+        {
+            label = this.labels[tile.position];
+        }
+
+        return label;
+    }
+
+    public Vector3 getWorldPosition(GameTile tile)
+    {
+        return this.grid.CellToWorld(tile.cellPosition);
+    }
+
+    public List<GameTile> neighbors(GameTile tile)
+    {
+        List<Position> neighbors = tile.position.neighbors;
+
+        List<GameTile> tiles = new List<GameTile>();
+        foreach (Position neighbor in neighbors)
+        {
+            tiles.Add(this.getTile(neighbor));
+        }
+
+        return tiles;
+    }
+
+    public IEnumerator path(Vector3 start, Vector3 end, List<Vector3> path)
+    {
+        AStar aStar = new AStar(this, this.getTile(end));
+
+        List<GameTile> tilePath = new List<GameTile>();
+        yield return StartCoroutine(aStar.search(this.getTile(start), tilePath));
+
+        foreach (GameTile tile in tilePath)
+        {
+            path.Add(this.getWorldPosition(tile));
+        }
     }
 }
