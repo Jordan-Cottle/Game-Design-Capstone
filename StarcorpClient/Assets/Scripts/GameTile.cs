@@ -1,71 +1,64 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
 /*
-    Represent the hexagonal grid as axial coordinates
-
-    Rows are indexed by the X coordinate
-
-    Columns are indexed by the Y coordinate
-
-    When needed, the third axial coordinate Z is calculated by
-        Z = -X - Y
+    Represent the hexagonal grid as cube coordinates
 */
 public struct Position
 {
+    public Vector3Int cellPosition;
+
     public int x;
     public int y;
-
-    public int z
-    {
-        get => -1 * (this.x + this.y);
-    }
-
-    public int row
-    {
-        get => x;
-    }
-
-    public int col
-    {
-        get => y;
-    }
-
-    public Position(int x, int y)
-    {
-        this.x = x;
-        this.y = y;
-    }
+    public int z;
 
     public Position(Vector3Int gridPos)
     {
-        this.x = gridPos.y;
-        this.y = gridPos.x;
+        this.x = gridPos.x - (gridPos.y - (gridPos.y & 1)) / 2;
+        this.z = gridPos.y;
+        this.y = -x - z;
+
+        this.cellPosition = gridPos;
     }
 
-    public Vector3Int cellPosition
+    public Position cubeOffset(int x, int y, int z)
     {
-        get => new Vector3Int(this.y, this.x, 0);
-    }
+        Position pos = new Position(this.cellPosition);
 
+        pos.x += x;
+        pos.y += y;
+        pos.z += z;
+
+        return pos;
+    }
     public List<Position> neighbors
     {
         get => new List<Position> {
-            new Position(this.x, this.y - 1),
-            new Position(this.x+1, this.y - 1),
-            new Position(this.x+1, this.y),
-            new Position(this.x, this.y + 1),
-            new Position(this.x-1, this.y + 1),
-            new Position(this.x-1, this.y),
+            this.cubeOffset(1, -1, 0),
+            this.cubeOffset(1, 0, -1),
+            this.cubeOffset(0, 1, -1),
+            this.cubeOffset(-1, 1, 0),
+            this.cubeOffset(-1, 0, 1),
+            this.cubeOffset(0, -1, 1),
         };
+    }
+
+    public static bool operator ==(Position a, Position b)
+    {
+        return a.x == b.x && a.y == b.y && a.z == b.z;
+    }
+
+    public static bool operator !=(Position a, Position b)
+    {
+        return !(a == b);
     }
 
     public override string ToString()
     {
-        return $"({this.x}, {this.y})";
+        return $"({this.x}, {this.y}, {this.z})";
     }
 }
 
