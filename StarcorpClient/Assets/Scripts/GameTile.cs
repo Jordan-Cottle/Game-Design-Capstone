@@ -60,6 +60,24 @@ public struct Position
     {
         return $"({this.x}, {this.y}, {this.z})";
     }
+
+    public override bool Equals(object obj)
+    {
+        if (obj == null)
+        {
+            return false;
+        }
+
+        Position other = (Position)obj;
+
+        return this == other;
+    }
+
+    public override int GetHashCode()
+    {
+        return this.x << 16 | this.y;
+    }
+
 }
 
 /*
@@ -102,12 +120,27 @@ public class GameTile : IComparable
             throw new ArgumentException("Cannot compare GameTile to null");
         }
 
+    public override bool Equals(object obj)
+    {
         GameTile other = obj as GameTile;
         if (other == null)
         {
             throw new ArgumentException($"{obj} is not a GameTile");
         }
 
+        return this.position == other.position;
+    }
+
+    public override int GetHashCode()
+    {
+        return this.position.GetHashCode();
+    }
+
+    public int CompareTo(object obj)
+    {
+        GameTile other = obj as GameTile;
+        if (other == null)
+            throw new ArgumentException("Cannot compare GameTile to null");
 
         return this.movementCost.CompareTo(other.movementCost);
     }
