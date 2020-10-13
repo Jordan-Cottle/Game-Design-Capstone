@@ -168,4 +168,9 @@ public class GameTile
     {
         return $"{this.terrainType.name()} {this.position}: {this.clickedCount}";
     }
+
+    override public string ToString()
+    {
+        return $"{TileData.TYPES[this.terrainType]} {this.position}: {this.clickedCount}";
+    }
 }
