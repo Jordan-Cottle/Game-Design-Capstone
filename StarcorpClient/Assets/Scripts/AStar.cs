@@ -26,7 +26,7 @@ class Node
         // If the passed object is null
         Node other = obj as Node;
 
-        if (other == null)
+        if (other is null)
         {
             return false;
         }

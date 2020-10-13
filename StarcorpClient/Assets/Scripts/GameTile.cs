@@ -63,7 +63,7 @@ public struct Position
 
     public override bool Equals(object obj)
     {
-        if (obj == null)
+        if (obj is null)
         {
             return false;
         }
@@ -126,7 +126,7 @@ public class GameTile
     public override bool Equals(object obj)
     {
         GameTile other = obj as GameTile;
-        if (other == null)
+        if (other is null)
             return false;
 
         return this.position == other.position;
@@ -140,7 +140,7 @@ public class GameTile
     public int CompareTo(object obj)
     {
         GameTile other = obj as GameTile;
-        if (other == null)
+        if (other is null)
             throw new ArgumentException("Cannot compare GameTile to null");
 
         return this.movementCost.CompareTo(other.movementCost);
