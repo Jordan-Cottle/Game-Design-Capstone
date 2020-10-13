@@ -1,37 +1,51 @@
 from flask import Flask, render_template
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
+
+import json
+from uuid import uuid4
 
 app = Flask(__name__)
 socketio = SocketIO(app)
 
-with open("html/index.html") as home_page_file:
-    home_page = home_page_file.read()
+class Player:
+    count = 0
 
+    def __init__(self, name):
+        Player.count += 1
 
-@socketio.on("message")
-def handle_message(message):
-    print("received message: " + message)
+        self.name = name
+        self.id = uuid4()
 
+    @property
+    def data(self):
 
-@socketio.on("my event")
-def handle_my_custom_event(json):
-    print("received json: " + str(json))
+        return {key: str(value) for key, value in self.__dict__.items()}
 
+    @property
+    def json(self):
+        return json.dumps(self.data)
+
+    def __str__(self):
+        return f"{self.name} {self.id}"
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@socketio.on('loginRequest')
+def processLogin(message):
+    print(f"Login requested: {message}")
+    emit("login", Player(message['data']).data)
 
 @socketio.on("connect")
 def test_connect():
-    emit("my response", {"data": "Connected"})
+    print("Client connecting!")
 
 
 @socketio.on("disconnect")
 def test_disconnect():
     print("Client disconnected")
 
-
-@app.route("/")
-def home():
-    return home_page
-
-
-if __name__ == "__main__":
-    socketio.run(app)
+if __name__ == '__main__':
+    print("Starting server!")
+    socketio.run(app, host="192.168.1.16", port="1234")
