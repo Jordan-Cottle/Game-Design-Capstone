@@ -9,19 +9,26 @@ using UnityEngine.Tilemaps;
 */
 public struct Position
 {
-    public Vector3Int cellPosition;
 
     public int x;
     public int y;
     public int z;
+
+    public Vector3Int cellPosition
+    {
+        get
+        {
+            int col = this.x + (this.z - (this.z & 1)) / 2;
+            int row = this.z;
+            return new Vector3Int(col, row, 0);
+        }
+    }
 
     public Position(Vector3Int gridPos)
     {
         this.x = gridPos.x - (gridPos.y - (gridPos.y & 1)) / 2;
         this.z = gridPos.y;
         this.y = -x - z;
-
-        this.cellPosition = gridPos;
     }
 
     public Position cubeOffset(int x, int y, int z)
