@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -60,6 +60,12 @@ public class HexGrid : MonoBehaviour
     public TerrainType terrainType(GameTile tile)
     {
         TileBase tileBase = this.grid.GetTile(tile.cellPosition);
+
+        if (tileBase is null)
+        {
+            return TerrainType.Space;
+        }
+
         TileData data = this.tileTypeData[tileBase];
 
         return data.terrainType;
@@ -113,5 +119,31 @@ public class HexGrid : MonoBehaviour
     public Vector3 getWorldPosition(GameTile tile)
     {
         return this.grid.CellToWorld(tile.cellPosition);
+    }
+
+    public List<GameTile> neighbors(GameTile tile)
+    {
+        List<Position> neighbors = tile.position.neighbors;
+
+        List<GameTile> tiles = new List<GameTile>();
+        foreach (Position neighbor in neighbors)
+        {
+            tiles.Add(this.getTile(neighbor));
+        }
+
+        return tiles;
+    }
+
+    public IEnumerator path(Vector3 start, Vector3 end, List<Vector3> path)
+    {
+        AStar aStar = new AStar(this, this.getTile(end));
+
+        List<GameTile> tilePath = new List<GameTile>();
+        yield return StartCoroutine(aStar.search(this.getTile(start), tilePath));
+
+        foreach (GameTile tile in tilePath)
+        {
+            path.Add(this.getWorldPosition(tile));
+        }
     }
 }
