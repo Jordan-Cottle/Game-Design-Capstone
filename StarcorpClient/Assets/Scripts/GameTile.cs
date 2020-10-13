@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -83,7 +83,7 @@ public struct Position
 /*
     Tiles consist of a position in the grid and their terrain type
 */
-public class GameTile : IComparable
+public class GameTile
 {
     public Position position;
 
@@ -113,20 +113,21 @@ public class GameTile : IComparable
         get => this.position.cellPosition;
     }
 
-    public int CompareTo(object obj)
+    public static bool operator ==(GameTile a, GameTile b)
     {
-        if (obj == null)
-        {
-            throw new ArgumentException("Cannot compare GameTile to null");
-        }
+        return a.position == b.position;
+    }
+
+    public static bool operator !=(GameTile a, GameTile b)
+    {
+        return a.position != b.position;
+    }
 
     public override bool Equals(object obj)
     {
         GameTile other = obj as GameTile;
         if (other == null)
-        {
-            throw new ArgumentException($"{obj} is not a GameTile");
-        }
+            return false;
 
         return this.position == other.position;
     }
@@ -143,6 +144,17 @@ public class GameTile : IComparable
             throw new ArgumentException("Cannot compare GameTile to null");
 
         return this.movementCost.CompareTo(other.movementCost);
+
+    }
+
+    public static bool operator <(GameTile a, GameTile b)
+    {
+        return a.terrainType.movementCost() < b.terrainType.movementCost();
+    }
+
+    public static bool operator >(GameTile a, GameTile b)
+    {
+        return a.terrainType.movementCost() > b.terrainType.movementCost();
     }
 
     override public string ToString()
