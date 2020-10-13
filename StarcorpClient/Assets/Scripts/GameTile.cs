@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -39,9 +39,20 @@ public struct Position
         this.y = y;
     }
 
-    public Position[] neighbors
+    public Position(Vector3Int gridPos)
     {
-        get => new Position[] {
+        this.x = gridPos.y;
+        this.y = gridPos.x;
+    }
+
+    public Vector3Int cellPosition
+    {
+        get => new Vector3Int(this.y, this.x, 0);
+    }
+
+    public List<Position> neighbors
+    {
+        get => new List<Position> {
             new Position(this.x, this.y - 1),
             new Position(this.x+1, this.y - 1),
             new Position(this.x+1, this.y),
