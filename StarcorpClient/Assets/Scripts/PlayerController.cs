@@ -8,7 +8,6 @@ public class PlayerController : MonoBehaviour
     public float maxSpeed = 5;
 
     private Transform playerTransform;
-    private Camera mainCamera;
     private HexGrid gameGrid;
 
     public string playerName;
@@ -16,43 +15,51 @@ public class PlayerController : MonoBehaviour
     bool moving = false;
 
     private Queue<Vector3> targets = new Queue<Vector3>();
+    private Vector3 destination;
 
     // Start is called before the first frame update
     void Start()
     {
-        this.mainCamera = Camera.main;
-
         this.gameGrid = (HexGrid)FindObjectOfType(typeof(HexGrid));
 
         this.playerTransform = GetComponent<Transform>();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void SetUp(Vector3Int position)
     {
-        if (Input.GetMouseButtonDown(0) && !this.moving)
-        {
-            StartCoroutine(this.moveTo(mainCamera.ScreenToWorldPoint(Input.mousePosition)));
-        }
+        this.gameGrid.getWorldPosition(position);
+        this.playerTransform.position = position;
     }
 
-    IEnumerator moveTo(Vector3 worldPosition)
+    public void MoveTo(Vector3 worldPosition)
     {
-        this.moving = true;
-        List<Vector3> positions = new List<Vector3>();
+        Vector3 start;
+        if (this.moving)
+        {
+            start = this.destination;
+        }
+        else
+        {
+            start = this.playerTransform.position;
+        }
 
-        yield return StartCoroutine(this.gameGrid.path(this.playerTransform.position, worldPosition, positions));
+        List<Vector3> positions = this.gameGrid.path(start, worldPosition);
 
         foreach (Vector3 position in positions)
         {
             this.targets.Enqueue(position);
+            this.destination = position;
         }
-        yield return StartCoroutine(ChaseTargets());
-        this.moving = false;
+
+        if (!this.moving)
+        {
+            StartCoroutine(ChaseTargets());
+        }
     }
 
     IEnumerator ChaseTargets()
     {
+        this.moving = true;
         while (this.targets.Count > 0)
         {
             Vector3 destination = this.targets.Dequeue();
@@ -62,5 +69,6 @@ public class PlayerController : MonoBehaviour
                 yield return null;
             }
         }
+        this.moving = false;
     }
 }
