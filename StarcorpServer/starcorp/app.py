@@ -6,35 +6,9 @@ from uuid import uuid4
 from flask import Flask
 from flask_socketio import SocketIO, emit
 
-from data.json_util import Serializable
 
 app = Flask(__name__)
 socketio = SocketIO(app)
-
-
-class Player(Serializable):
-    """ Represent a player. """
-
-    count = 0
-
-    def __init__(self, name):
-        Player.count += 1
-
-        self.name = name
-        self.player_id = uuid4()
-
-    @property
-    def json(self):
-        return json.dumps({key: str(value) for key, value in self.__dict__.items()})
-
-    @staticmethod
-    def load(data):
-        player = Player(data["name"])
-        player.player_id = data["player_id"]
-        return player
-
-    def __str__(self):
-        return f"{self.name} {self.player_id}"
 
 
 @socketio.on("loginRequest")
