@@ -7,4 +7,4 @@ socketio = SocketIO(app)
 
 # Set up events
 from .login import *
-from .movement import *
+from .player_input import *
