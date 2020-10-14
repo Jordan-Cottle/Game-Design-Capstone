@@ -9,7 +9,7 @@ from objects.player import Player
 from server import socketio
 
 
-@socketio.on("loginRequest")
+@socketio.on("login_request")
 def process_login(message):
     """ Handle players attempting to login. """
 
