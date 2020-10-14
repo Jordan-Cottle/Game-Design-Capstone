@@ -22,7 +22,7 @@ ignore-patterns=
 
 # Use multiple processes to speed up Pylint. Specifying 0 will auto-detect the
 # number of processors available to use.
-jobs=1
+jobs=0
 
 # Control the amount of potential inferred values when inferring a single
 # object. This can help the performance when dealing with large functions or
@@ -229,7 +229,7 @@ missing-member-hint=yes
 
 # The minimum edit distance a name should have in order to be considered a
 # similar match for a missing member name.
-missing-member-hint-distance=1
+missing-member-hint-distance=3
 
 # The total number of similar names that should be taken in consideration when
 # showing a hint for a missing member.
@@ -331,7 +331,10 @@ good-names=i,
            k,
            ex,
            Run,
-           _
+           _,
+           x,
+           y,
+           z
 
 # Good variable names regexes, separated by a comma. If names match any regex,
 # they will always be accepted
@@ -386,8 +389,7 @@ variable-naming-style=snake_case
 
 # List of note tags to take in consideration, separated by a comma.
 notes=FIXME,
-      XXX,
-      TODO
+      XXX
 
 # Regular expression of note tags to take in consideration.
 #notes-rgx=
@@ -457,7 +459,7 @@ redefining-builtins-modules=six.moves,past.builtins,future.builtins,builtins,io
 
 # The type of string formatting that logging methods do. `old` means using %
 # formatting, `new` is for `{}` formatting.
-logging-format-style=old
+logging-format-style=new
 
 # Logging modules to check that the string format arguments are in logging
 # function parameter format.
