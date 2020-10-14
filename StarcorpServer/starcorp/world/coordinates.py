@@ -30,9 +30,24 @@ class Coordinate(Serializable):
         return f"<{self.x},{self.y},{self.z}>"
 
     @property
+    def neighbors(self):
+        """ Get all neighboring tiles. """
+        return [self + offset for offset in DIRECTIONS]
+
+    @property
     def json(self):
         return f"{self.x},{self.y},{self.z}"
 
     @classmethod
     def load(cls, data):
         return cls(*(int(datum) for datum in data.strip("\"'").split(",")))
+
+
+DIRECTIONS = (
+    Coordinate(1, -1, 0),
+    Coordinate(1, 0, -1),
+    Coordinate(0, 1, -1),
+    Coordinate(-1, 1, 0),
+    Coordinate(-1, 0, 1),
+    Coordinate(0, -1, 1),
+)

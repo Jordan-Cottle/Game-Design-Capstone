@@ -1,6 +1,8 @@
 from data.json_util import loads, dumps
 from world.coordinates import Coordinate
 
+from itertools import permutations
+
 
 def test_serializable(a):
     coordinate = Coordinate(1, 2, -3)
@@ -27,3 +29,16 @@ def test_hash(origin, a, b):
     assert data[origin] == 0
     assert data[a] == 1
     assert data[b] == 2
+
+
+def test_neighbors(origin):
+    neighbors = origin.neighbors
+
+    assert origin not in neighbors, "A position cannot be its own neighbor"
+
+    assert len(neighbors) == 6, "Each tile should have 6 neighbors"
+
+    for permutation in permutations((-1, 0, 1), 3):
+        expected = Coordinate(*permutation)
+
+        assert expected in neighbors, "Neighbors is missing a value!"
