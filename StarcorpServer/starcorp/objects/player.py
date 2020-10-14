@@ -12,16 +12,17 @@ class Player(GameObject):
 
     @property
     def json(self):
-        return dumps(self.__dict__)
+        data = super().json
+        data["name"] = self.name
+
+        return data
 
     @classmethod
     def load(cls, data):
-        super().load(data)
 
-        player = cls()
+        player = super().load(data)
 
-        for key, value in data.items:
-            player.__dict__[key] = loads(value)
+        player.name = data["name"]
 
         return player
 

@@ -21,6 +21,24 @@ class GameObject(Serializable):
     def valid_position(self, position):
         """ Determine if a position is a valid for this object. """
 
+    @property
+    def json(self):
+        data = super().json
+
+        data["uuid"] = self.uuid
+        data["position"] = self.position.json
+
+        return data
+
+    @classmethod
+    def load(cls, data):
+        obj = cls()
+
+        obj.uuid = data["uuid"]
+        obj.position = Coordinate.load(data["position"])
+
+        return obj
+
     def move_to(self, position):
         if not self.valid_position(position):
             raise ValueError(f"{position} is invalid for {self}")
