@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 /*
     Represent the hexagonal grid as cube coordinates
@@ -24,10 +22,10 @@ public struct Position
         }
     }
 
-    public Position(Vector3Int gridPos)
+    public Position(Vector3Int pos)
     {
-        this.x = gridPos.x - (gridPos.y - (gridPos.y & 1)) / 2;
-        this.z = gridPos.y;
+        this.x = pos.x - (pos.y - (pos.y & 1)) / 2;
+        this.z = pos.y;
         this.y = -x - z;
     }
 

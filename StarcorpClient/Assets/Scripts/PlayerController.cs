@@ -27,8 +27,8 @@ public class PlayerController : MonoBehaviour
 
     public void SetUp(Vector3Int position)
     {
-        this.gameGrid.getWorldPosition(position);
-        this.playerTransform.position = position;
+        Position p = new Position(position);
+        this.playerTransform.position = this.gameGrid.getWorldPosition(p);
     }
 
     public void MoveTo(Vector3 worldPosition)

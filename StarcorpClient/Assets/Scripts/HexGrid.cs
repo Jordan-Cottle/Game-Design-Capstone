@@ -115,6 +115,11 @@ public class HexGrid : MonoBehaviour
         return label;
     }
 
+    public Vector3 getWorldPosition(Position position)
+    {
+        return this.grid.CellToWorld(this.getTile(position).cellPosition);
+    }
+
     public Vector3 getWorldPosition(GameTile tile)
     {
         return this.grid.CellToWorld(tile.cellPosition);
