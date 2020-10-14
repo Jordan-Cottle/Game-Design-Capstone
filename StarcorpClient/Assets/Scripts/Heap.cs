@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class Heap<T>
+public class Heap<T> where T : IComparable
 {
     List<T> items;
     private Dictionary<T, int> locations;
@@ -54,8 +54,8 @@ public class Heap<T>
 
     private void updateUp(int index)
     {
-        dynamic current;
-        dynamic parent;
+        T current;
+        T parent;
         int current_index = index;
         int parent_index;
         bool swapping = true;
@@ -66,7 +66,7 @@ public class Heap<T>
             current = this.items[current_index];
             parent = this.items[parent_index];
 
-            if (current < parent)
+            if (current.CompareTo(parent) < 0)
             {
                 swapping = true;
                 this.swap(current_index, parent_index);
@@ -77,10 +77,10 @@ public class Heap<T>
 
     private void updateDown(int index)
     {
-        dynamic current;
-        dynamic left_child;
-        dynamic right_child;
-        dynamic lesser_child;
+        T current;
+        T left_child;
+        T right_child;
+        T lesser_child;
 
         int current_index = index;
         int child_index;
@@ -102,7 +102,7 @@ public class Heap<T>
                 child_index = this.right_child(current_index);
                 right_child = this.items[child_index];
 
-                if (left_child < right_child)
+                if (left_child.CompareTo(right_child) < 0)
                 {
                     lesser_child = left_child;
                     child_index = this.left_child(current_index);
@@ -114,7 +114,7 @@ public class Heap<T>
                 }
             }
 
-            if (lesser_child < current)
+            if (lesser_child.CompareTo(current) < 0)
             {
                 swapping = true;
                 this.swap(current_index, child_index);

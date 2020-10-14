@@ -1,9 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-class Node
+class Node : IComparable
 {
     public GameTile tile;
     public Node parent;
@@ -58,6 +59,27 @@ class Node
         return a.estimateToGoal > b.estimateToGoal;
     }
 
+    public int CompareTo(object o)
+    {
+        Node other = o as Node;
+
+        if (other is null)
+        {
+            throw new ArgumentException("Cannot compare GameTile to null");
+        }
+
+        if (this < other)
+        {
+            return -1;
+        }
+        else if (this > other)
+        {
+            return 1;
+        }
+
+        return 0;
+    }
+
     override public string ToString()
     {
         return $"{this.tile}: {this.costFromStart}";
@@ -80,9 +102,6 @@ public class AStar
         Heap<Node> openList = new Heap<Node>();
         HashSet<GameTile> closed = new HashSet<GameTile>();
 
-        Canvas canvas = this.world.canvas;
-        Text label = this.world.textPrefab;
-
         // Push start onto heap for first iteration of while loop below
 
         Node currentNode = new Node(start, 0, this.destination);
@@ -100,13 +119,6 @@ public class AStar
                 yield break;  // No path can be created
             }
 
-            label = this.world.getLabel(currentNode.tile);
-            string previous = label.text;
-            label.text = "Current Node";
-            yield return new WaitForSeconds(0.1f);
-            label.text = previous;
-
-
             if (currentNode.tile == this.destination)
             {
                 break;
@@ -117,12 +129,6 @@ public class AStar
 
             foreach (GameTile neighbor in neighbors)
             {
-                label = this.world.getLabel(neighbor);
-                previous = label.text;
-                label.text = "Neighbor found";
-                yield return new WaitForSeconds(0.1f);
-                label.text = previous;
-
                 // Debug.Log($"AStar looking at {neighbor}");
                 if (closed.Contains(neighbor))
                 {
