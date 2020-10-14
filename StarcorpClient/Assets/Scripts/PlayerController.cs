@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,7 +7,6 @@ public class PlayerController : MonoBehaviour
 {
     public float maxSpeed = 5;
 
-    private Transform playerTransform;
     private HexGrid gameGrid;
 
     public string playerName;
@@ -20,13 +19,12 @@ public class PlayerController : MonoBehaviour
     void Awake()
     {
         this.gameGrid = FindObjectOfType<HexGrid>();
-        this.playerTransform = GetComponent<Transform>();
     }
 
     public void MoveTo(Vector3Int position)
     {
         Position p = new Position(position);
-        this.playerTransform.position = this.gameGrid.getWorldPosition(p);
+        this.transform.position = this.gameGrid.getWorldPosition(p);
     }
 
     public void TravelTo(Vector3 worldPosition)
@@ -38,7 +36,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            start = this.playerTransform.position;
+            start = this.transform.position;
         }
 
         List<Vector3> positions = this.gameGrid.path(start, worldPosition);
@@ -61,9 +59,9 @@ public class PlayerController : MonoBehaviour
         while (this.targets.Count > 0)
         {
             Vector3 destination = this.targets.Dequeue();
-            while (this.playerTransform.position != destination)
+            while (this.transform.position != destination)
             {
-                this.playerTransform.position = Vector3.MoveTowards(this.playerTransform.position, destination, this.maxSpeed * Time.deltaTime);
+                this.transform.position = Vector3.MoveTowards(this.transform.position, destination, this.maxSpeed * Time.deltaTime);
                 yield return null;
             }
         }
