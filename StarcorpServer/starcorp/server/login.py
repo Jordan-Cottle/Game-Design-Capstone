@@ -42,8 +42,9 @@ def process_login(message):
     session_id = str(uuid4())
     SESSIONS[session_id] = player
 
-    response = {"player": player.json, "session_id": session_id}
-    emit("login_accepted", response)
+    emit("login_accepted", {"session_id": session_id})
+    emit("player_joined", player.json, broadcast=True)
+
 
 
 @socketio.on("connect")
