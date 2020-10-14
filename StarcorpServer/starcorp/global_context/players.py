@@ -1,0 +1,2 @@
+PLAYER_LIST = {}
+SESSIONS = {}
