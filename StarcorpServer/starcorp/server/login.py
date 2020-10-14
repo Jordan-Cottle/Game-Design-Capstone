@@ -6,6 +6,8 @@ from flask_socketio import emit
 from global_context import PLAYER_LIST, SESSIONS
 from objects.player import Player
 
+from world.coordinates import Coordinate
+
 from server import socketio
 
 
@@ -32,6 +34,8 @@ def process_login(message):
         player = Player()
         player.name = player_name
         PLAYER_LIST[player_name] = player
+
+        player.position = Coordinate(-3, 3, 0)
         print("New player created")
 
     # Give user a unique id to track which player they control
