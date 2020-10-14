@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using Newtonsoft.Json.Linq;
+
+[RequireComponent(typeof(ObjectManager))]
 public class GameController : MonoBehaviour
 {
     // Start is called before the first frame update
-    public PlayerController player;
+    private PlayerController player;
 
     private Camera mainCamera;
 
@@ -17,14 +20,24 @@ public class GameController : MonoBehaviour
         this.mainCamera = Camera.main;
 
         this.socket = new Socket();
-        this.objectManager = new ObjectManager();
+        this.objectManager = GetComponent<ObjectManager>();
 
         this.Initialize();
     }
 
     void Initialize()
     {
-        socket.Login(this.player);
+        this.objectManager.SetUp(this.socket);
+
+        this.socket.Register("player_load", (ev) =>
+        {
+            this.player = this.objectManager.CreatePlayer((JObject)ev.Data[0]);
+
+
+            this.mainCamera.transform.SetParent(this.player.transform, false);
+        });
+
+        socket.Login("UnityTest");
     }
 
     // Update is called once per frame
@@ -32,7 +45,7 @@ public class GameController : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            this.player.MoveTo(mainCamera.ScreenToWorldPoint(Input.mousePosition));
+            this.player.TravelTo(mainCamera.ScreenToWorldPoint(Input.mousePosition));
         }
     }
 }

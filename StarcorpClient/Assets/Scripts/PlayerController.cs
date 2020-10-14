@@ -20,18 +20,17 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        this.gameGrid = (HexGrid)FindObjectOfType(typeof(HexGrid));
-
+        this.gameGrid = FindObjectOfType<HexGrid>();
         this.playerTransform = GetComponent<Transform>();
     }
 
-    public void SetUp(Vector3Int position)
+    public void MoveTo(Vector3Int position)
     {
         Position p = new Position(position);
         this.playerTransform.position = this.gameGrid.getWorldPosition(p);
     }
 
-    public void MoveTo(Vector3 worldPosition)
+    public void TravelTo(Vector3 worldPosition)
     {
         Vector3 start;
         if (this.moving)

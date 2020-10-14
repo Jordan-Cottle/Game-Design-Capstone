@@ -22,10 +22,11 @@ public class Socket
         this.socket.OnError += (err) => Debug.Log("Socket Error: " + err);
     }
 
-    public void Login(PlayerController player)
+    public void Login(string playerName)
     {
         Debug.Log("Logging in");
-        this.socket.On("login_accepted", (ev) =>
+
+        this.Register("login_accepted", (ev) =>
         {
             var data = ev.Data[0];
 
@@ -33,20 +34,19 @@ public class Socket
             this.sessionID = (string)data["session_id"];
 
             Debug.Log($"Logged in successfully with {sessionID}");
-            string position = (string)data["player"]["position"];
 
-            string[] args = position.Split(',');
-            Vector3Int pos = new Vector3Int(0, 0, 0);
-            pos.x = int.Parse(args[0]);
-            pos.y = int.Parse(args[1]);
-            pos.z = int.Parse(args[2]);
-
-            Debug.Log($"Setting up player with {pos}");
-            player.SetUp(pos);
+            this.Emit("player_load", new JObject());
         });
 
         this.socket.Connect();
-        this.socket.Emit("login_request", $"{{\"name\": \"{player.playerName}\"}}");
+        this.socket.Emit("login_request", JObject.Parse($"{{'name': '{playerName}'}}"));
+    }
+
+    public void Emit(string ev, JObject data)
+    {
+        data["session_id"] = this.sessionID;
+
+        this.socket.Emit(ev, data);
     }
 
     public void Register(string ev, Action<SocketIOEvent> handler)
