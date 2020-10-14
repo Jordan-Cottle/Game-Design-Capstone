@@ -46,6 +46,17 @@ def process_login(message):
     emit("player_joined", player.json, broadcast=True)
 
 
+@socketio.on("logout")
+def logout(message):
+
+    if not isinstance(message, dict):
+        message = json.loads(message)
+
+    player = SESSIONS.pop(message["session_id"])
+    emit("player_logout", player.json, broadcast=True)
+
+    # TODO: Persist player object
+
 
 @socketio.on("connect")
 def test_connect():
