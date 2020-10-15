@@ -27,6 +27,7 @@ class User(Serializable):
         data = super().json
         data["name"] = self.name
         data["user_id"] = self.user_id
+        data["session_id"] = self.session_id
         return data
 
     @classmethod
@@ -34,5 +35,6 @@ class User(Serializable):
         user = User(data["name"])
 
         user.user_id = data["user_id"]
+        # Do not load session id
 
         return user
