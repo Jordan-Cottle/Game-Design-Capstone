@@ -96,9 +96,10 @@ public class AStar
         this.world = world;
         this.destination = destination;
     }
-    public IEnumerator search(GameTile start, List<GameTile> path)
+    public List<GameTile> search(GameTile start)
     {
 
+        List<GameTile> path = new List<GameTile>();
         Heap<Node> openList = new Heap<Node>();
         HashSet<GameTile> closed = new HashSet<GameTile>();
 
@@ -116,7 +117,7 @@ public class AStar
             }
             else
             {
-                yield break;  // No path can be created
+                return path;  // No path can be created
             }
 
             if (currentNode.tile == this.destination)
@@ -170,5 +171,6 @@ public class AStar
         }
 
         path.Reverse();
+        return path;
     }
 }

@@ -50,7 +50,6 @@ public class HexGrid : MonoBehaviour
         Position pos = new Position(cellPosition);
         if (!this.labels.ContainsKey(pos))
         {
-            Debug.Log($"Cell position: ({cellPosition.x}, {cellPosition.y})::{worldPosition}");
             Text label = Instantiate(textPrefab, this.grid.CellToWorld(cellPosition), Quaternion.identity, this.canvas.transform);
             label.text = $"({cellPosition.x}, {cellPosition.y})\n {pos}";
             this.labels[pos] = label;
@@ -73,7 +72,7 @@ public class HexGrid : MonoBehaviour
 
     public GameTile getTile(Vector3 worldPosition)
     {
-        Vector3Int coordinate = grid.WorldToCell(worldPosition);
+        Vector3Int coordinate = this.grid.WorldToCell(worldPosition);
 
         Position pos = new Position(coordinate);
 
@@ -116,9 +115,19 @@ public class HexGrid : MonoBehaviour
         return label;
     }
 
+    public Vector3 getWorldPosition(Position position)
+    {
+        return this.grid.CellToWorld(this.getTile(position).cellPosition);
+    }
+
     public Vector3 getWorldPosition(GameTile tile)
     {
         return this.grid.CellToWorld(tile.cellPosition);
+    }
+
+    public Vector3 getWorldPosition(Vector3Int position)
+    {
+        return this.grid.CellToWorld(position);
     }
 
     public List<GameTile> neighbors(GameTile tile)
@@ -134,16 +143,18 @@ public class HexGrid : MonoBehaviour
         return tiles;
     }
 
-    public IEnumerator path(Vector3 start, Vector3 end, List<Vector3> path)
+    public List<Position> path(Vector3 start, Vector3 end)
     {
+        List<Position> path = new List<Position>();
         AStar aStar = new AStar(this, this.getTile(end));
 
-        List<GameTile> tilePath = new List<GameTile>();
-        yield return StartCoroutine(aStar.search(this.getTile(start), tilePath));
+        List<GameTile> tilePath = aStar.search(this.getTile(start));
 
         foreach (GameTile tile in tilePath)
         {
-            path.Add(this.getWorldPosition(tile));
+            path.Add(tile.position);
         }
+
+        return path;
     }
 }

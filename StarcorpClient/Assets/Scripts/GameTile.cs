@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 /*
     Represent the hexagonal grid as cube coordinates
@@ -24,11 +22,20 @@ public struct Position
         }
     }
 
-    public Position(Vector3Int gridPos)
+    public Position(Vector3Int pos)
     {
-        this.x = gridPos.x - (gridPos.y - (gridPos.y & 1)) / 2;
-        this.z = gridPos.y;
+        this.x = pos.x - (pos.y - (pos.y & 1)) / 2;
+        this.z = pos.y;
         this.y = -x - z;
+    }
+
+    public Position(string data)
+    {
+        Debug.Log($"Parsing {data}");
+        string[] args = data.Trim('"').Split(',');
+        this.x = int.Parse(args[0]);
+        this.y = int.Parse(args[1]);
+        this.z = int.Parse(args[2]);
     }
 
     public Position cubeOffset(int x, int y, int z)
@@ -66,6 +73,11 @@ public struct Position
     public override string ToString()
     {
         return $"({this.x}, {this.y}, {this.z})";
+    }
+
+    public string json
+    {
+        get => $"{this.x},{this.y},{this.z}";
     }
 
     public override bool Equals(object obj)
