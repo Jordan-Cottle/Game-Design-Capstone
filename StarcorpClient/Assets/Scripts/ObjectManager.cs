@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -27,7 +27,7 @@ public class ObjectManager : MonoBehaviour
 
             // TODO: Handle generically
             PlayerController player = this.Get(uuid).GetComponent<PlayerController>();
-            player.MoveTo(pos);
+            player.JumpTo(position);
         });
 
         socket.Register("player_joined", (ev) =>
@@ -44,7 +44,7 @@ public class ObjectManager : MonoBehaviour
         Debug.Log($"Setting up player with {position}");
 
         PlayerController player = Instantiate(this.playerPrefab, Vector3.zero, Quaternion.identity);
-        player.MoveTo(pos);
+        player.JumpTo(position);
 
         this.Track(uuid, player.gameObject);
 

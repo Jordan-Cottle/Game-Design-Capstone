@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Transform))]
@@ -11,7 +10,7 @@ public class PlayerController : MonoBehaviour
 
     public string playerName;
 
-    bool moving = false;
+    public bool moving = false;
 
     private Queue<Vector3> targets = new Queue<Vector3>();
     private Vector3 destination;
@@ -21,50 +20,19 @@ public class PlayerController : MonoBehaviour
         this.gameGrid = FindObjectOfType<HexGrid>();
     }
 
-    public void MoveTo(Vector3Int position)
+    public void JumpTo(Position position)
     {
-        Position p = new Position(position);
-        this.transform.position = this.gameGrid.getWorldPosition(p);
+        this.transform.position = this.gameGrid.getWorldPosition(position);
     }
 
-    public void TravelTo(Vector3 worldPosition)
+
+    public void JumpTo(Vector3 destination)
     {
-        Vector3 start;
-        if (this.moving)
-        {
-            start = this.destination;
-        }
-        else
-        {
-            start = this.transform.position;
-        }
-
-        List<Vector3> positions = this.gameGrid.path(start, worldPosition);
-
-        foreach (Vector3 position in positions)
-        {
-            this.targets.Enqueue(position);
-            this.destination = position;
-        }
-
-        if (!this.moving)
-        {
-            StartCoroutine(ChaseTargets());
-        }
+        this.transform.position = destination;
     }
 
-    IEnumerator ChaseTargets()
+    public void MoveTowards(Vector3 destination)
     {
-        this.moving = true;
-        while (this.targets.Count > 0)
-        {
-            Vector3 destination = this.targets.Dequeue();
-            while (this.transform.position != destination)
-            {
-                this.transform.position = Vector3.MoveTowards(this.transform.position, destination, this.maxSpeed * Time.deltaTime);
-                yield return null;
-            }
-        }
-        this.moving = false;
+        this.transform.position = Vector3.MoveTowards(this.transform.position, destination, this.maxSpeed * Time.deltaTime);
     }
 }

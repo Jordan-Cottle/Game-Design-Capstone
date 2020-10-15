@@ -2391,6 +2391,7 @@ GameObject:
   - component: {fileID: 1583916150}
   - component: {fileID: 1583916149}
   - component: {fileID: 1583916151}
+  - component: {fileID: 1583916152}
   m_Layer: 0
   m_Name: GameController
   m_TagString: Untagged
@@ -2437,3 +2438,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerPrefab: {fileID: 1062458599958425506, guid: 992eda8bb3437fa499581907bf7d0915, type: 3}
+--- !u!114 &1583916152
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1583916148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b00aa0b37ccdfbe42afc740c6f7ce44f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

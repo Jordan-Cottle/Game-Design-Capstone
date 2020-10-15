@@ -143,16 +143,16 @@ public class HexGrid : MonoBehaviour
         return tiles;
     }
 
-    public List<Vector3> path(Vector3 start, Vector3 end)
+    public List<Position> path(Vector3 start, Vector3 end)
     {
-        List<Vector3> path = new List<Vector3>();
+        List<Position> path = new List<Position>();
         AStar aStar = new AStar(this, this.getTile(end));
 
         List<GameTile> tilePath = aStar.search(this.getTile(start));
 
         foreach (GameTile tile in tilePath)
         {
-            path.Add(this.getWorldPosition(tile));
+            path.Add(tile.position);
         }
 
         return path;
