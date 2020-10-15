@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -23,13 +23,7 @@ public class ObjectManager : MonoBehaviour
 
             string uuid = (string)data["uuid"];
 
-            string position = (string)data["position"];
-
-            string[] args = position.Split(',');
-            Vector3Int pos = new Vector3Int(0, 0, 0);
-            pos.x = int.Parse(args[0]);
-            pos.y = int.Parse(args[1]);
-            pos.z = int.Parse(args[2]);
+            Position position = new Position((string)data["destination"]);
 
             // TODO: Handle generically
             PlayerController player = this.Get(uuid).GetComponent<PlayerController>();
@@ -45,15 +39,9 @@ public class ObjectManager : MonoBehaviour
     public PlayerController CreatePlayer(JObject data)
     {
         string uuid = (string)data["uuid"];
-        string position = (string)data["position"];
+        Position position = new Position((string)data["position"]);
 
-        string[] args = position.Split(',');
-        Vector3Int pos = new Vector3Int(0, 0, 0);
-        pos.x = int.Parse(args[0]);
-        pos.y = int.Parse(args[1]);
-        pos.z = int.Parse(args[2]);
-
-        Debug.Log($"Setting up player with {pos}");
+        Debug.Log($"Setting up player with {position}");
 
         PlayerController player = Instantiate(this.playerPrefab, Vector3.zero, Quaternion.identity);
         player.MoveTo(pos);
