@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 using Dpoch.SocketIO;
 using Newtonsoft.Json.Linq;
 
-public class Socket
+public class Socket : MonoBehaviour
 {
     private const string URL = "ws://lanparty.mynetgear.com:1234/socket.io/?EIO=4&transport=websocket";
 
@@ -12,7 +13,7 @@ public class Socket
     private string sessionID;
 
 
-    public Socket()
+    public void Awake()
     {
         this.socket = new SocketIO(URL);
 
@@ -20,6 +21,15 @@ public class Socket
         this.socket.OnConnectFailed += () => Debug.Log("Socket failed to connect!");
         this.socket.OnClose += () => Debug.Log("Socket closed!");
         this.socket.OnError += (err) => Debug.Log("Socket Error: " + err);
+    }
+
+    IEnumerator KeepAlive()
+    {
+        while (true)
+        {
+            this.Emit("check_in");
+            yield return new WaitForSeconds(1);
+        }
     }
 
     public void Login(string playerName)
@@ -35,7 +45,9 @@ public class Socket
 
             Debug.Log($"Logged in successfully with {sessionID}");
 
-            this.Emit("player_load", new JObject());
+            this.Emit("player_load");
+
+            StartCoroutine(this.KeepAlive());
         });
 
         this.socket.Connect();
@@ -48,14 +60,21 @@ public class Socket
 
         this.socket.Emit(ev, data);
     }
+    public void Emit(string ev)
+    {
+        JObject data = new JObject();
+        data["session_id"] = this.sessionID;
+
+        this.socket.Emit(ev, data);
+    }
 
     public void Register(string ev, Action<SocketIOEvent> handler)
     {
         this.socket.On(ev, handler);
     }
 
-    void Close()
+    public void Close()
     {
-        socket.Close();
+        this.socket.Close();
     }
 }
