@@ -2,6 +2,8 @@
 import json
 from abc import ABC, abstractmethod
 
+from flask.json import JSONEncoder, JSONDecoder
+
 TYPE_META = "__TYPE__"
 
 
@@ -38,8 +40,6 @@ def from_json(data, types={}):
     if object_type is None:
         return data
 
-    print(data, type(data))
-
     return types[object_type].load(data)
 
 
@@ -48,6 +48,34 @@ def to_json(obj):
         raise TypeError(f"{obj} is not JSON serializable")
 
     return obj.json
+
+
+class Encoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Serializable):
+            return obj.json
+
+        return super().default(obj)
+
+
+class Decoder(JSONDecoder):
+    def __init__(self, *args, **kwargs):
+        self.types = {}
+
+        for cls in get_all_subclasses(Serializable):
+            types[cls.__qualname__] = cls
+
+        self.orig_obj_hook = kwargs.pop("object_hook", lambda data: data)
+        super(CustomJSONDecoder, self).__init__(
+            *args, object_hook=self.custom_obj_hook, **kwargs
+        )
+
+    def custom_obj_hook(data):
+        object_type = data.get(TYPE_META)
+        if object_type is None:
+            return self.orig_obj_hook(data)
+
+        return types[object_type].load(data)
 
 
 def loads(data, **kwargs):
