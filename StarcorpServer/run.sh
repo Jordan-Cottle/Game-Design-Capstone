@@ -1,3 +1,3 @@
 source .venv/bin/activate
 
-python app.py
+python starcorp/app.py
