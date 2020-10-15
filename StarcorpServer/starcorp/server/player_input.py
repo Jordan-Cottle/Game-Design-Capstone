@@ -1,20 +1,22 @@
 """ Module for all player input related events. """
 
 
-from world.coordinates import Coordinate
-from server import socketio
-
+from data.json_util import dumps
 from flask_socketio import emit
+from global_context import PLAYER_LIST, SESSIONS
+from world.coordinates import Coordinate
 
-from global_context import SESSIONS, PLAYER_LIST
+from server import socketio
 
 
 @socketio.on("player_move")
 def move_player(message):
 
-    player = SESSIONS[message["session_id"]]
+    user = SESSIONS[message["session_id"]]
+    player = PLAYER_LIST[user.name]
 
     destination = Coordinate.load(message["destination"])
+    print(f"Processing player movement request to {destination}")
 
     # TODO: Spend AP for movement
 
@@ -28,6 +30,6 @@ def move_player(message):
     else:
         emit(
             "object_moved",
-            {"object_id": player.uuid, "destination": player.position},
+            {"uuid": player.uuid, "destination": dumps(player.position)},
             broadcast=True,
         )
