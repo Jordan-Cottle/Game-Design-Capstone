@@ -22,7 +22,7 @@ class Player(GameObject):
         player.user = user
         player.resources = {resource: 0 for resource in ALL_RESOURCES}
 
-        player.store(player.name)
+        player.store(player.uuid)
 
         PLAYERS[user.id] = player
 
