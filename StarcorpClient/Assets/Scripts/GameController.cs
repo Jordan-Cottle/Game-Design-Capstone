@@ -24,6 +24,11 @@ public class GameController : MonoBehaviour
     {
         get; private set;
     }
+
+    public ResourceManager ResourceManager
+    {
+        get; private set;
+    }
     public HexGrid gameGrid;
 
     void Start()
@@ -35,6 +40,7 @@ public class GameController : MonoBehaviour
         this.gameGrid = FindObjectOfType<HexGrid>();
 
         this.CityManager = GetComponent<CityManager>();
+        this.ResourceManager = GetComponent<ResourceManager>();
 
         this.Initialize();
     }
@@ -51,6 +57,7 @@ public class GameController : MonoBehaviour
             this.mainCamera.transform.SetParent(this.player.transform, false);
 
             this.CityManager.Initialize(this.socket);
+            this.ResourceManager.Initialize(this.socket);
         });
 
         this.socket.Register("player_logout", (ev) =>
