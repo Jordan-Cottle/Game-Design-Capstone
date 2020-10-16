@@ -21,9 +21,10 @@ public class ObjectManager : MonoBehaviour
         {
             var data = ev.Data[0];
 
+            Debug.Log($"Player movemement: {data}");
             string uuid = (string)data["uuid"];
 
-            Position position = new Position((string)data["destination"]);
+            Position position = new Position((string)data["position"]);
 
             // TODO: Handle generically
             PlayerController player = this.Get(uuid).GetComponent<PlayerController>();
