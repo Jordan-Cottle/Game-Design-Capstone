@@ -1,20 +1,15 @@
 import os
 
+import flask
+from data.json_util import TYPE_META, Decoder, Encoder, Serializable
 from flask import Flask
 from flask_socketio import SocketIO
-from flask_login import LoginManager, current_user
-from functools import wraps
-
-from data.json_util import Serializable, TYPE_META, Encoder, Decoder
-
 
 socketio = SocketIO()
-login_manager = LoginManager()
 
 # Set up server
 app = Flask("StarCorp")
 
-login_manager.init_app(app)
 
 app.secret_key = os.environ["SECRET_KEY"]
 
@@ -36,18 +31,7 @@ def convert_custom_object(obj):
 
 app.make_response = convert_custom_object
 
-socketio.init_app(app)
-
-
-def authenticated_only(f):
-    @wraps(f)
-    def wrapped(*args, **kwargs):
-        if not current_user.is_authenticated:
-            disconnect()
-        else:
-            return f(*args, **kwargs)
-
-    return wrapped
+socketio.init_app(app, json=flask.json)
 
 
 # Core imports

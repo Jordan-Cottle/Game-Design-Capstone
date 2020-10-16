@@ -5,14 +5,14 @@ from flask_socketio import emit
 from global_context import PLAYER_LIST, SESSIONS
 from world.coordinates import Coordinate
 
-from server import socketio
+from server import login_required, socketio
 
 
 @socketio.on("player_move")
-def move_player(message):
+@login_required
+def move_player(user, message):
 
-    user = SESSIONS[message["session_id"]]
-    player = PLAYER_LIST[user.name]
+    player = PLAYER_LIST[user.id]
 
     destination = Coordinate.load(message["destination"])
     print(f"Processing player movement request to {destination}")
