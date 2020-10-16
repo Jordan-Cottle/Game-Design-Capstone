@@ -1,10 +1,10 @@
 """ Utilities for serializing objects using the json module. """
 import os
+import json
 from abc import ABC, abstractmethod
 
 from data import STORAGE_DIR
 
-from flask import json
 from flask.json import JSONEncoder, JSONDecoder
 
 TYPE_META = "__TYPE__"
@@ -95,9 +95,9 @@ class Serializable(ABC):
 
     def store(self, file_name):
         with open(self.file_name(file_name), "w") as data_file:
-            json.dump(self, data_file)
+            json.dump(self, data_file, cls=Encoder)
 
     @classmethod
     def retrieve(cls, file_name):
         with open(cls.file_name(file_name), "r") as data_file:
-            return json.load(data_file)
+            return json.load(data_file, cls=Decoder)
