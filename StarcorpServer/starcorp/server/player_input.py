@@ -2,7 +2,7 @@
 
 
 from flask_socketio import emit
-from global_context import PLAYER_LIST, SESSIONS
+from global_context import PLAYER_LIST
 from world.coordinates import Coordinate
 
 from server import login_required, socketio
