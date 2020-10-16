@@ -31,7 +31,6 @@ public struct Position
 
     public Position(string data)
     {
-        Debug.Log($"Parsing {data}");
         string[] args = data.Trim('"').Split(',');
         this.x = int.Parse(args[0]);
         this.y = int.Parse(args[1]);
