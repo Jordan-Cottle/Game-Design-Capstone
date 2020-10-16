@@ -129,6 +129,14 @@ public class HexGrid : MonoBehaviour
     {
         return this.grid.CellToWorld(position);
     }
+    public Vector3 getWorldPosition(Vector3 screenPosition)
+    {
+        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(screenPosition);
+
+        // Snap worldPosition to grid
+        Vector3Int cellPosition = this.grid.WorldToCell(worldPosition);
+        return this.grid.CellToWorld(cellPosition);
+    }
 
     public List<GameTile> neighbors(GameTile tile)
     {
