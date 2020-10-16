@@ -1,39 +1,58 @@
 """ Module for all events related to log in/out. """
 import json
 import time
+from http import HTTPStatus
 from uuid import uuid4
 
 import eventlet
+from flask import request
+from flask_login import current_user, login_required, login_user
 from flask_socketio import emit
 from global_context import PLAYER_LIST, SESSIONS
 from objects.player import Player
 from world.coordinates import Coordinate
 
-from server import socketio
+from server import HttpError, app, authenticated_only, login_manager, socketio
 from server.user import User
 
 
-@socketio.on("login_request")
-def process_login(message):
+class UnauthorizedError(HttpError):
+    response_code = HTTPStatus.UNAUTHORIZED
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.retrieve(user_id)
+
+
+@app.route("/login", methods=["POST"])
+def login():
     """ Handle players attempting to login. """
 
-    if not isinstance(message, dict):
-        message = json.loads(message)
-
+    message = request.json
     print(f"Login requested: {message}")
 
-    player_name = message.get("name")
+    player_name = message and message.get("name")
 
     # TODO: Handle authentication
 
     if player_name is None:
-        emit("login_denied", "A username must be provided to log in")
+        raise UnauthorizedError("A username must be provided to log in")
 
     # Give user a unique id to track which player they control
     user = User(player_name)
-    SESSIONS[user.session_id] = user
+    login_user(user)
 
-    emit("login_accepted", {"session_id": user.session_id})
+    return user
+
+
+@app.route("/hello")
+@login_required
+def hello():
+    """ Test endpoint. """
+
+    print(current_user)
+    return current_user._get_current_object()
 
 
 @socketio.on("player_load")

@@ -1,7 +1,6 @@
 """ Module for all player input related events. """
 
 
-from data.json_util import dumps
 from flask_socketio import emit
 from global_context import PLAYER_LIST, SESSIONS
 from world.coordinates import Coordinate
@@ -30,6 +29,6 @@ def move_player(message):
     else:
         emit(
             "object_moved",
-            {"uuid": player.uuid, "destination": dumps(player.position)},
+            player,
             broadcast=True,
         )
