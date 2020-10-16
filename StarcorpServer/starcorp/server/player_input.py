@@ -7,7 +7,7 @@ from world.coordinates import Coordinate
 
 from server import login_required, socketio
 
-from objects import Player
+from objects import Player, City, ALL_RESOURCES
 
 
 @socketio.on("player_move")
@@ -60,3 +60,33 @@ def gather_resource(user, message):
         player.store(player.uuid)
 
         emit("resource_gathered", player)
+
+
+@socketio.on("sell_resource")
+@login_required
+def sell_resource(user, message):
+    player = Player.by_user(user)
+
+    city = City.get(message["city_id"])
+
+    if player.position != city.position:
+        emit(
+            "gather_denied",
+            {"message": f"Unable to gather at {target}: No resource node present"},
+        )
+    else:
+        for resource in ALL_RESOURCES:
+            player_held = player.held(resource)
+            if 0 < player_held <= 5:
+                volume = player_held
+            elif player_held <= 0:
+                continue
+            else:
+                volume = 5
+
+            player.resources[resource] -= volume
+            profit = city.sell(resource, volume)
+            player.money += profit
+            player.store(player.uuid)
+
+        emit("resources_sold", {"player": player, "city": city})

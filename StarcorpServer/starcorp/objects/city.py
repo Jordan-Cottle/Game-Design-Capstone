@@ -78,6 +78,14 @@ class City(GameObject):
 
         self.population += self.growth
 
+    def sell(self, resource, volume):
+        value = resource.cost(self.demand(resource)) * volume
+        print(f"{volume} units of {resource} sold to {self}")
+        self.resources[resource] += volume
+
+        print(self.resources[resource], "units in stock at {self}")
+        return value
+
     def __str__(self):
         return self.name
 

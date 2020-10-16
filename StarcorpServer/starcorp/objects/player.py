@@ -14,6 +14,7 @@ class Player(GameObject):
 
         self.user = None
         self.resources = {}
+        self.money = 0
 
     @classmethod
     def create(cls, name, user):
@@ -21,6 +22,7 @@ class Player(GameObject):
         player.name = name
         player.user = user
         player.resources = {resource: 0 for resource in ALL_RESOURCES}
+        player.money = 100
 
         player.store(player.uuid)
 
@@ -33,7 +35,7 @@ class Player(GameObject):
         return PLAYERS[user.id]
 
     def held(self, resource):
-        return PLAYER_RESOURCES[self][resource]
+        return self.resources[resource]
 
     @property
     def json(self):
@@ -44,6 +46,7 @@ class Player(GameObject):
         data["resources"] = {
             resource.name: value for resource, value in self.resources.items()
         }
+        data["money"] = self.money
 
         return data
 
@@ -58,6 +61,8 @@ class Player(GameObject):
             Resource.retrieve(resource): value
             for resource, value in data["resources"].items()
         }
+
+        player.money = data["money"]
 
         return player
 
