@@ -1,6 +1,6 @@
 """ Module for handling data requests from the client. """
 
-from global_context import CITIES
+from global_context import CITIES, RESOURCE_NODES
 
 from world.coordinates import Coordinate
 from flask_socketio import emit
@@ -24,3 +24,11 @@ def get_city_data(user, message):
 
     if city:
         emit("update_city", city)
+
+
+@socketio.on("get_resource_data")
+@login_required
+def get_resource_data(user, message):
+    print(f"Resource nodes requested by {user}")
+    for position, resource in RESOURCE_NODES.items():
+        emit("load_resource", {"position": position, "type": resource.name})
