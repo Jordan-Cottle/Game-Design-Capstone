@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 public class ResourceManager : MonoBehaviour
 {
     private Dictionary<Position, Resource> resources;
+    private Dictionary<string, int> resourcesCounts;
     private GameController controller;
 
     public Text display;
@@ -17,6 +18,12 @@ public class ResourceManager : MonoBehaviour
     void Start()
     {
         this.resources = new Dictionary<Position, Resource>();
+        this.resourcesCounts = new Dictionary<string, int>();
+
+        // TODO make this better
+        this.resourcesCounts["Water"] = 0;
+        this.resourcesCounts["Food"] = 0;
+        this.resourcesCounts["Fuel"] = 0;
 
         this.controller = GetComponent<GameController>();
     }
@@ -31,13 +38,10 @@ public class ResourceManager : MonoBehaviour
             Debug.Log($"Resources gathered: {ev.Data[0]}");
             JObject resources = (JObject)ev.Data[0]["resources"];
 
-            string output = "~~Resources~~\n";
             foreach (var resource in resources)
             {
-                output += $"{resource.Value} {resource.Key}\n";
+                this.resourcesCounts[(string)resource.Key] = (int)resource.Value;
             }
-
-            this.display.text = output;
         });
 
         foreach (var resource in FindObjectsOfType<Resource>())
@@ -45,6 +49,11 @@ public class ResourceManager : MonoBehaviour
             resource.Initialize();
             this.resources[resource.position] = resource;
         }
+    }
+
+    public void Set(string resourceType, int value)
+    {
+        this.resourcesCounts[resourceType] = value;
     }
 
     void Update()
@@ -66,5 +75,28 @@ public class ResourceManager : MonoBehaviour
                 this.socket.Emit("gather_resource", obj);
             }
         }
+    }
+
+    void OnGUI()
+    {
+        this.display.text = this.ToString();
+    }
+
+    public override string ToString()
+    {
+        string output = "~~Resources~~\n";
+        HashSet<string> displayed = new HashSet<string>();
+        foreach (var resource in this.resources)
+        {
+            if (displayed.Contains(resource.Value.type))
+            {
+                continue;
+            }
+            output += $"{resource.Value.type} {this.resourcesCounts[resource.Value.type]}\n";
+            displayed.Add(resource.Value.type);
+        }
+
+        this.display.text = output;
+        return output;
     }
 }

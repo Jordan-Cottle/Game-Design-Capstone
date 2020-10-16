@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 using Newtonsoft.Json.Linq;
 
@@ -9,6 +10,8 @@ public class City : MonoBehaviour
     public string uuid;
     public int population;
     public Dictionary<string, int> resources;
+
+    public Text label;
 
     void Awake()
     {
@@ -34,5 +37,24 @@ public class City : MonoBehaviour
     {
         int food = this.resources["Food"];
         Debug.Log($"{this.name}: {food} clicked!");
+    }
+
+    public void OnGUI()
+    {
+        this.label.text = this.ToString();
+    }
+
+    public override string ToString()
+    {
+        string s = $"{this.name} ({this.population})\n";
+
+        foreach (var resource in this.resources)
+        {
+            s += $"{resource.Key}: {resource.Value}\n";
+        }
+
+        // TODO: Display demand and prices
+
+        return s;
     }
 }
