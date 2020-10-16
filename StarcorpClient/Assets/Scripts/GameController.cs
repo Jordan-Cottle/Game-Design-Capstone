@@ -47,7 +47,7 @@ public class GameController : MonoBehaviour
             Destroy(this.objectManager.Get(uuid));
         });
 
-        socket.Login($"UnityTest{Random.value}");
+        this.socket.Login($"UnityTest{Random.value}");
     }
 
     IEnumerator MovePlayerTo(Vector3 worldPosition)
