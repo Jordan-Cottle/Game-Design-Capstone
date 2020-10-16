@@ -46,7 +46,6 @@ public class Socket : MonoBehaviour
         {
             var data = ev.Data[0];
 
-            Debug.Log(data);
             this.userID = (string)data["id"];
 
             this.AddCookie("id", this.userID);
@@ -116,10 +115,7 @@ public class Socket : MonoBehaviour
 
         yield return request.SendWebRequest();
 
-        string results = request.downloadHandler.text;
-        Debug.Log(results);
-
-        callBack(JObject.Parse(results));
+        callBack(JObject.Parse(request.downloadHandler.text));
     }
 
     public void Register(string ev, Action<SocketIOEvent> handler)

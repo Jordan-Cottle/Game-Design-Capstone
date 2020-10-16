@@ -21,7 +21,6 @@ public class ObjectManager : MonoBehaviour
         {
             var data = ev.Data[0];
 
-            Debug.Log($"Player movemement: {data}");
             string uuid = (string)data["uuid"];
 
             Position position = new Position((string)data["position"]);

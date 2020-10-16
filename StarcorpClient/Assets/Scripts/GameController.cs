@@ -14,7 +14,17 @@ public class GameController : MonoBehaviour
 
     private Socket socket;
     private ObjectManager objectManager;
-    private HexGrid gameGrid;
+
+    public ObjectManager ObjectManager
+    {
+        get => this.objectManager;
+    }
+
+    public CityManager CityManager
+    {
+        get; private set;
+    }
+    public HexGrid gameGrid;
 
     void Start()
     {
@@ -23,6 +33,8 @@ public class GameController : MonoBehaviour
         this.socket = GetComponent<Socket>();
         this.objectManager = GetComponent<ObjectManager>();
         this.gameGrid = FindObjectOfType<HexGrid>();
+
+        this.CityManager = GetComponent<CityManager>();
 
         this.Initialize();
     }
@@ -37,6 +49,8 @@ public class GameController : MonoBehaviour
 
 
             this.mainCamera.transform.SetParent(this.player.transform, false);
+
+            this.CityManager.Initialize(this.socket);
         });
 
         this.socket.Register("player_logout", (ev) =>
@@ -50,7 +64,7 @@ public class GameController : MonoBehaviour
         this.socket.Login($"UnityTest{Random.value}");
     }
 
-    IEnumerator MovePlayerTo(Vector3 worldPosition)
+    IEnumerator MovePlayerTo(Vector3 screenPosition)
     {
         Vector3 start;
         if (this.player.moving)
@@ -60,7 +74,7 @@ public class GameController : MonoBehaviour
 
         start = this.player.transform.position;
 
-        List<Position> positions = this.gameGrid.path(start, worldPosition);
+        List<Position> positions = this.gameGrid.path(start, Camera.main.ScreenToWorldPoint(screenPosition));
 
         player.moving = true;
         foreach (Position position in positions)
@@ -84,7 +98,7 @@ public class GameController : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            StartCoroutine(this.MovePlayerTo(mainCamera.ScreenToWorldPoint(Input.mousePosition)));
+            StartCoroutine(this.MovePlayerTo(Input.mousePosition));
         }
     }
 
