@@ -8,6 +8,15 @@ class Player(GameObject):
         super().__init__()
         self.name = "Player"
 
+    @classmethod
+    def create(cls, name):
+        player = cls()
+        player.name = name
+
+        player.store(player.name)
+
+        return player
+
     @property
     def json(self):
         data = super().json
@@ -19,7 +28,6 @@ class Player(GameObject):
     def load(cls, data):
 
         player = super().load(data)
-
         player.name = data["name"]
 
         return player
