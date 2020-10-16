@@ -1,2 +1,1 @@
-PLAYER_LIST = {}
-SESSIONS = {}
+PLAYERS = {}

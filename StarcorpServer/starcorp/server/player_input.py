@@ -2,7 +2,7 @@
 
 
 from flask_socketio import emit
-from global_context import PLAYER_LIST, SESSIONS
+from global_context import PLAYERS
 from world.coordinates import Coordinate
 
 from server import login_required, socketio
@@ -12,7 +12,7 @@ from server import login_required, socketio
 @login_required
 def move_player(user, message):
 
-    player = PLAYER_LIST[user.id]
+    player = PLAYERS[user.id]
 
     destination = Coordinate.load(message["destination"])
     print(f"Processing player movement request to {destination}")

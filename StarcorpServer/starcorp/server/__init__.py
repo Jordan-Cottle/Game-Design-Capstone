@@ -40,3 +40,4 @@ from .exceptions import *
 # Set up events
 from .login import *
 from .player_input import *
+from .data_requests import *
