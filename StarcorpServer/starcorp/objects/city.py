@@ -11,9 +11,9 @@ class City(GameObject):
         self.name = "City"
         self.population = 0
         self.resources = {
-            FOOD: 0,
-            WATER: 0,
-            FUEL: 0,
+            FOOD: 5,
+            WATER: 15,
+            FUEL: 2,
         }
 
     def valid_position(self, position):
