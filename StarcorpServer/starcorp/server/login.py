@@ -1,82 +1,92 @@
 """ Module for all events related to log in/out. """
 import json
 import time
+from functools import wraps
 from http import HTTPStatus
 from uuid import uuid4
 
 import eventlet
-from flask import request
-from flask_login import current_user, login_required, login_user
 from flask_socketio import emit
-from global_context import PLAYER_LIST, SESSIONS
+from global_context import PLAYER_LIST
 from objects.player import Player
 from world.coordinates import Coordinate
 
-from server import HttpError, app, authenticated_only, login_manager, socketio
+from server import HttpError, app, socketio
 from server.user import User
+
+
+def login_required(f):
+    @wraps(f)
+    def log_in(*args, **kwargs):
+        try:
+            message = args[0]
+        except IndexError:
+            raise UnauthorizedError("Users must log in to access this!")
+
+        try:
+            user = User.retrieve(message["id"])
+        except KeyError:
+            raise UnauthorizedError("Users must log in to access this!")
+
+        return f(user, *args, **kwargs)
+
+    return log_in
 
 
 class UnauthorizedError(HttpError):
     response_code = HTTPStatus.UNAUTHORIZED
 
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.retrieve(user_id)
+@app.route("/health")
+def health():
+    print("Health checked")
+    return {"status": "okay"}
 
 
-@app.route("/login", methods=["POST"])
-def login():
-    """ Handle players attempting to login. """
+@app.route("/test", methods=["POST"])
+def test_post():
+    print("post received")
 
-    message = request.json
+    return {"hello": "world"}
+
+
+@socketio.on("login")
+def socket_login(message):
+
     print(f"Login requested: {message}")
-
-    player_name = message and message.get("name")
+    try:
+        player_name = message["name"]
+    except KeyError:
+        raise UnauthorizedError("A username must be provided to log in")
 
     # TODO: Handle authentication
-
-    if player_name is None:
-        raise UnauthorizedError("A username must be provided to log in")
 
     # Give user a unique id to track which player they control
     user = User(player_name)
-    login_user(user)
 
-    return user
+    user.store(user.id)
 
-
-@app.route("/hello")
-@login_required
-def hello():
-    """ Test endpoint. """
-
-    print(current_user)
-    return current_user._get_current_object()
+    emit("login_accepted", user)
 
 
 @socketio.on("player_load")
-def load_player(message):
-
-    if not isinstance(message, dict):
-        message = json.loads(message)
-
-    session_id = message["session_id"]
-
-    player_name = SESSIONS[session_id].name
-
+@login_required
+def load_player(user, message):
     # TODO: Handle authentication
+
+    print("Loading player")
 
     for player in PLAYER_LIST.values():
         emit("player_joined", player.json)
 
-    if player_name in PLAYER_LIST:
-        player = PLAYER_LIST[player_name]
+    user_id = user.id
+
+    if user_id in PLAYER_LIST:
+        player = PLAYER_LIST[user_id]
         print("Existing player loaded")
     else:
-        player = Player()
-        player.name = player_name
-        PLAYER_LIST[player_name] = player
+        player = Player.create(user.name)
+        PLAYER_LIST[user_id] = player
 
         player.position = Coordinate(-4, 1, 3)
         print("New player created")
@@ -86,24 +96,23 @@ def load_player(message):
 
 
 @socketio.on("logout")
-def logout(message):
+@login_required
+def logout(user, message):
 
     print(f"Player logging out: {message}")
     if not isinstance(message, dict):
         message = json.loads(message)
 
-    user = SESSIONS.pop(message["session_id"])
-    player = PLAYER_LIST.pop(user.name)
+    player = PLAYER_LIST.pop(user.id)
     emit("player_logout", player.json, broadcast=True)
 
-    # TODO: Persist player object
+    player.store(player.uuid)
 
 
 @socketio.on("check_in")
-def check_in(message):
-    session_id = message["session_id"]
+@login_required
+def check_in(user, message):
 
-    user = SESSIONS[session_id]
     user.ping()
     print(f"{user.last_seen}: {user.name} checked in")
 
@@ -116,22 +125,28 @@ def test_connect():
 
 
 @socketio.on("disconnect")
-def check_players():
+def test_disconnect():
     """ Handle sockets being disconnected. """
 
     print("Client disconnected")
 
-    eventlet.sleep(2)
 
-    for user in list(SESSIONS.values()):
-        if time.time() - user.last_seen > 2:
+def monitor_players():
+    with app.app_context():
+        while True:
+            for user_id in list(PLAYER_LIST.keys()):
+                user = User.retrieve(user_id)
+                if time.time() - user.last_seen > 30:
+                    player = PLAYER_LIST.pop(user_id)
 
-            SESSIONS.pop(user.session_id)
-            player = PLAYER_LIST.pop(user.name)
+                    print(f"Logging out {player}")
 
-            print(f"Logging out {player}")
+                    emit("player_logout", player.json, broadcast=True)
 
-            emit("player_logout", player.json, broadcast=True)
+                    user.store(user.id)
+                    player.store(player.uuid)
 
-            # TODO: persist user
-            # TODO: persist player
+            eventlet.sleep(5)
+
+
+eventlet.spawn(monitor_players)
