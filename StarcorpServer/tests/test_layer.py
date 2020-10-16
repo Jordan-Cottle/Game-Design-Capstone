@@ -1,5 +1,4 @@
 import pytest
-from data.json_util import dumps, loads
 from world.layer import Layer
 from world.tile_type import TileType
 
@@ -16,12 +15,16 @@ def _tilemap(origin, a, b):
 
 
 def test_serializable(tilemap, origin, a, b):
-    data = dumps(tilemap)
+    data = tilemap.json
 
     print(data)
 
-    assert data == r'{"__TYPE__": "Layer", "0,0,0": 1, "1,2,-3": 0, "-4,1,3": 2}'
-    reserialized = loads(data)
+    assert data["__TYPE__"] == "Layer"
+    assert data["0,0,0"] == 1
+    assert data["1,2,-3"] == 0
+    assert data["-4,1,3"] == 2
+
+    reserialized = Layer.load(data)
 
     assert tilemap[origin] == reserialized[origin]
     assert tilemap[a] == reserialized[a]

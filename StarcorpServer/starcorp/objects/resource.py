@@ -41,3 +41,5 @@ class Resource(Serializable):
 FOOD = Resource.retrieve("Food")
 WATER = Resource.retrieve("Water")
 FUEL = Resource.retrieve("Fuel")
+
+ALL_RESOURCES = [FOOD, WATER, FUEL]

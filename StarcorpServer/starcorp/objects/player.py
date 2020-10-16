@@ -1,5 +1,9 @@
 from objects.gameobject import GameObject
 
+from global_context import PLAYERS
+
+from objects import ALL_RESOURCES, User, Resource
+
 
 class Player(GameObject):
     """ Represent a player. """
@@ -8,19 +12,38 @@ class Player(GameObject):
         super().__init__()
         self.name = "Player"
 
+        self.user = None
+        self.resources = {}
+
     @classmethod
-    def create(cls, name):
+    def create(cls, name, user):
         player = cls()
         player.name = name
+        player.user = user
+        player.resources = {resource: 0 for resource in ALL_RESOURCES}
 
-        player.store(player.name)
+        player.store(player.uuid)
+
+        PLAYERS[user.id] = player
 
         return player
+
+    @staticmethod
+    def by_user(user):
+        return PLAYERS[user.id]
+
+    def held(self, resource):
+        return PLAYER_RESOURCES[self][resource]
 
     @property
     def json(self):
         data = super().json
         data["name"] = self.name
+
+        data["user"] = self.user.json
+        data["resources"] = {
+            resource.name: value for resource, value in self.resources.items()
+        }
 
         return data
 
@@ -29,6 +52,12 @@ class Player(GameObject):
 
         player = super().load(data)
         player.name = data["name"]
+
+        player.user = User.load(data["user"])
+        player.resources = {
+            Resource.retrieve(resource): value
+            for resource, value in data["resources"].items()
+        }
 
         return player
 

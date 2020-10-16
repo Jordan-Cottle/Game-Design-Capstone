@@ -2,6 +2,9 @@ from flask import json
 
 from objects import FOOD, FUEL, WATER, GameObject
 
+from world.coordinates import Coordinate
+from global_context import CITIES
+
 
 class City(GameObject):
     """ Represent a city in the game. """
@@ -77,3 +80,21 @@ class City(GameObject):
 
     def __str__(self):
         return self.name
+
+
+# TODO: move initialization of cities to a proper loading function
+c = City()
+c.name = "Demoville"
+c.population = 10
+
+c.position = Coordinate(-4, 2, 2)
+
+CITIES[c.position] = c
+
+c = City()
+c.name = "Otherville"
+c.population = 42
+
+c.position = Coordinate(-2, 2, 0)
+
+CITIES[c.position] = c

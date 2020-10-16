@@ -1,4 +1,3 @@
-from data.json_util import loads, dumps
 from world.coordinates import Coordinate
 
 from itertools import permutations
@@ -7,9 +6,9 @@ from itertools import permutations
 def test_serializable(a):
     coordinate = Coordinate(1, 2, -3)
 
-    data = dumps(coordinate)
+    data = coordinate.json
 
-    assert data == '"1,2,-3"', "Json was not the expected output"
+    assert data == "1,2,-3", "Json was not the expected output"
 
     assert coordinate == Coordinate.load(
         data

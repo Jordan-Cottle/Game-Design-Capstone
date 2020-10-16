@@ -12,7 +12,7 @@ from objects.player import Player
 from world.coordinates import Coordinate
 
 from server import HttpError, app, socketio
-from server.user import User
+from objects import User
 
 
 def login_required(f):
@@ -85,8 +85,7 @@ def load_player(user, message):
         player = PLAYERS[user_id]
         print("Existing player loaded")
     else:
-        player = Player.create(user.name)
-        PLAYERS[user_id] = player
+        player = Player.create(user.name, user)
 
         player.position = Coordinate(-4, 1, 3)
         print("New player created")
