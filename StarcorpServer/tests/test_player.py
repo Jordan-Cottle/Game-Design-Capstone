@@ -1,18 +1,13 @@
 import pytest
 
-from objects.player import Player
-
-from data.json_util import dumps, loads
+from objects import Player, User
 
 from world.coordinates import DIRECTIONS
 
 
 @pytest.fixture(name="player")
 def _player():
-    player = Player()
-    player.name = "TestPlayer"
-
-    return player
+    return Player.create("TestPlayer", User("Test"))
 
 
 def test_player_movement(player, a):
@@ -28,15 +23,17 @@ def test_player_movement(player, a):
 
 
 def test_serializable(player):
-    data = dumps(player)
+    data = player.json
 
-    assert '"__TYPE__": "Player"' in data, "Json data should have the object's type"
-    assert '"uuid": ' in data, "Json data should have the object's uuid"
-    assert '"position": "0,0,0"' in data, "Json data should have the object's position"
+    assert data["__TYPE__"] == "Player", "Json data should have the object's type"
+    assert "uuid" in data, "Json data should have the object's uuid"
+    assert data["position"] == "0,0,0", "Json data should have the object's position"
 
-    assert '"name": "TestPlayer"' in data, "Json data should have the player's name"
+    assert data["name"] == "TestPlayer", "Json data should have the player's name"
+    assert "user" in data, "Player should track which user it belongs to"
+    assert data["resources"] == {"Food": 0, "Water": 0, "Fuel": 0}
 
-    reinstantiated = loads(data)
+    reinstantiated = Player.load(data)
 
     assert player.name == reinstantiated.name
     assert player.position == reinstantiated.position
