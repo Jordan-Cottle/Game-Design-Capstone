@@ -7,7 +7,7 @@ from uuid import uuid4
 
 import eventlet
 from flask_socketio import emit
-from global_context import PLAYER_LIST
+from global_context import PLAYERS
 from objects.player import Player
 from world.coordinates import Coordinate
 
@@ -76,17 +76,17 @@ def load_player(user, message):
 
     print("Loading player")
 
-    for player in PLAYER_LIST.values():
+    for player in PLAYERS.values():
         emit("player_joined", player.json)
 
     user_id = user.id
 
-    if user_id in PLAYER_LIST:
-        player = PLAYER_LIST[user_id]
+    if user_id in PLAYERS:
+        player = PLAYERS[user_id]
         print("Existing player loaded")
     else:
         player = Player.create(user.name)
-        PLAYER_LIST[user_id] = player
+        PLAYERS[user_id] = player
 
         player.position = Coordinate(-4, 1, 3)
         print("New player created")
@@ -103,7 +103,7 @@ def logout(user, message):
     if not isinstance(message, dict):
         message = json.loads(message)
 
-    player = PLAYER_LIST.pop(user.id)
+    player = PLAYERS.pop(user.id)
     emit("player_logout", player.json, broadcast=True)
 
     player.store(player.uuid)
@@ -134,10 +134,10 @@ def test_disconnect():
 def monitor_players():
     with app.app_context():
         while True:
-            for user_id in list(PLAYER_LIST.keys()):
+            for user_id in list(PLAYERS.keys()):
                 user = User.retrieve(user_id)
                 if time.time() - user.last_seen > 30:
-                    player = PLAYER_LIST.pop(user_id)
+                    player = PLAYERS.pop(user_id)
 
                     print(f"Logging out {player}")
 

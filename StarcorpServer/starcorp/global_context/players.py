@@ -1,1 +1,1 @@
-PLAYER_LIST = {}
+PLAYERS = {}
