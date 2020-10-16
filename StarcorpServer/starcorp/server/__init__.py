@@ -1,15 +1,13 @@
 import os
 
+import flask
+from data.json_util import TYPE_META, Decoder, Encoder, Serializable
 from flask import Flask
 from flask_socketio import SocketIO
 from flask_login import LoginManager, current_user
 from functools import wraps
 
-from data.json_util import Serializable, TYPE_META, Encoder, Decoder
-
-
 socketio = SocketIO()
-login_manager = LoginManager()
 
 # Set up server
 app = Flask("StarCorp")
@@ -36,7 +34,7 @@ def convert_custom_object(obj):
 
 app.make_response = convert_custom_object
 
-socketio.init_app(app)
+socketio.init_app(app, json=flask.json)
 
 
 def authenticated_only(f):
