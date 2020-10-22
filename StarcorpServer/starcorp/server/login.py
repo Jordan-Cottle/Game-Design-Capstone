@@ -28,6 +28,8 @@ def login_required(f):
         except KeyError:
             raise UnauthorizedError("Users must log in to access this!")
 
+        user.ping()
+
         return f(user, *args, **kwargs)
 
     return log_in
