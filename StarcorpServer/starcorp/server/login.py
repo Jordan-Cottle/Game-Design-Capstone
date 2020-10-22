@@ -142,7 +142,7 @@ def monitor_players():
 
                     print(f"Logging out {player}")
 
-                    emit("player_logout", player.json, broadcast=True)
+                    socketio.emit("player_logout", player.json)
 
                     user.store(user.id)
                     player.store(player.uuid)
