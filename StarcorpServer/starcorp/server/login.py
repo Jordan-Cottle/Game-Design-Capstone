@@ -14,6 +14,8 @@ from world.coordinates import Coordinate
 from server import HttpError, app, socketio
 from objects import User
 
+INACTIVE_TIMEOUT = 30
+
 
 def login_required(f):
     @wraps(f)
@@ -27,6 +29,8 @@ def login_required(f):
             user = User.retrieve(message["id"])
         except KeyError:
             raise UnauthorizedError("Users must log in to access this!")
+
+        user.ping()
 
         return f(user, *args, **kwargs)
 
@@ -135,12 +139,12 @@ def monitor_players():
         while True:
             for user_id in list(PLAYERS.keys()):
                 user = User.retrieve(user_id)
-                if time.time() - user.last_seen > 30:
+                if time.time() - user.last_seen > INACTIVE_TIMEOUT:
                     player = PLAYERS.pop(user_id)
 
                     print(f"Logging out {player}")
 
-                    emit("player_logout", player.json, broadcast=True)
+                    socketio.emit("player_logout", player.json)
 
                     user.store(user.id)
                     player.store(player.uuid)
