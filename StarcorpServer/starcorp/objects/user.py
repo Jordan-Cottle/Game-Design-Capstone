@@ -12,9 +12,7 @@ class User(Serializable):
 
     def __init__(self, name):
         self.name = name
-        self.last_seen = time.time()
-
-        self.store(self.id)
+        self.last_seen = 0
 
     @property
     def id(self):
@@ -33,8 +31,10 @@ class User(Serializable):
     @property
     def json(self):
         data = super().json
+
         data.update(self.__dict__)
         data["id"] = self.id
+
         return data
 
     @classmethod
@@ -44,3 +44,6 @@ class User(Serializable):
         user.__dict__.update(data)
 
         return user
+
+    def __repr__(self):
+        return f"{self.name}: {self.last_seen}"
