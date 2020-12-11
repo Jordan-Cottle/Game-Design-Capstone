@@ -1,1 +1,2 @@
+""" Global city data. """
 CITIES = {}

@@ -1,3 +1,5 @@
+""" Module for logging configuration. """
+
 import os
 import sys
 import logging
@@ -34,4 +36,5 @@ if os.getenv("LOG_TO_CONSOLE") == "true":
 
 
 def get_logger(name):
+    """ Utility for getting a child of the configured logger. """
     return logging.getLogger(f"{LOGGER_NAME}.{name}")

@@ -18,7 +18,7 @@ ignore-patterns=
 
 # Python code to execute, usually for sys.path manipulation such as
 # pygtk.require().
-#init-hook=
+init-hook="from pylint.config import PYLINTRC; import os, sys; sys.path.append(os.path.dirname(PYLINTRC) + '/starcorp')"
 
 # Use multiple processes to speed up Pylint. Specifying 0 will auto-detect the
 # number of processors available to use.
@@ -138,7 +138,8 @@ disable=print-statement,
         xreadlines-attribute,
         deprecated-sys-function,
         exception-escape,
-        comprehension-escape
+        comprehension-escape,
+        logging-fstring-interpolation
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -334,7 +335,8 @@ good-names=i,
            _,
            x,
            y,
-           z
+           z,
+           id
 
 # Good variable names regexes, separated by a comma. If names match any regex,
 # they will always be accepted

@@ -3,68 +3,70 @@ import json
 import time
 from functools import wraps
 from http import HTTPStatus
-from uuid import uuid4
 
 import eventlet
 from flask_socketio import emit
-from global_context import PLAYERS
-from objects.player import Player
-from world.coordinates import Coordinate
 
+from global_context import PLAYERS
+from objects import Player, User
 from server import HttpError, app, socketio
-from objects import User
 from utils import get_logger
+from world import Coordinate
+
 
 LOGGER = get_logger(__name__)
 
 INACTIVE_TIMEOUT = 30
 
 
-def login_required(f):
-    @wraps(f)
+def login_required(func):
+    """Decorator for enforcing a logged in user.
+
+    Also pulls the token out of the request and passes a user instance into the decorated function.
+    """
+
+    @wraps(func)
     def log_in(*args, **kwargs):
         try:
             message = args[0]
-        except IndexError:
-            raise UnauthorizedError("Users must log in to access this!")
+        except IndexError as error:
+            raise UnauthorizedError("Users must log in to access this!") from error
 
         try:
             user = User.retrieve(message["id"])
-        except KeyError:
-            raise UnauthorizedError("Users must log in to access this!")
+        except KeyError as error:
+            raise UnauthorizedError("Users must log in to access this!") from error
 
         user.ping()
 
-        return f(user, *args, **kwargs)
+        return func(user, *args, **kwargs)
 
     return log_in
 
 
 class UnauthorizedError(HttpError):
+    """ Error for when an unauthorized access is attempted. """
+
     response_code = HTTPStatus.UNAUTHORIZED
 
 
 @app.route("/health")
 def health():
+    """ Return "okay" to provide simple endpoint to validate server is up. """
+
     LOGGER.debug("Health checked")
     return {"status": "okay"}
 
 
-@app.route("/test", methods=["POST"])
-def test_post():
-    LOGGER.debug("Test POST received")
-
-    return {"hello": "world"}
-
-
 @socketio.on("login")
 def socket_login(message):
+    """ Process login even from a player. """
 
     LOGGER.info(f"Login requested: {message}")
     try:
         player_name = message["name"]
-    except KeyError:
-        raise UnauthorizedError("A username must be provided to log in")
+    except KeyError as error:
+        raise UnauthorizedError("A username must be provided to log in") from error
 
     # TODO: Handle authentication
 
@@ -78,7 +80,9 @@ def socket_login(message):
 
 @socketio.on("player_load")
 @login_required
-def load_player(user, message):
+def load_player(user, message):  # pylint: disable=unused-argument
+    """ Load a player into the world. """
+
     # TODO: Handle authentication
 
     LOGGER.info("Loading player for {user}")
@@ -104,6 +108,7 @@ def load_player(user, message):
 @socketio.on("logout")
 @login_required
 def logout(user, message):
+    """ Process logout of a player. """
 
     LOGGER.info(f"Player logging out: {message}")
     if not isinstance(message, dict):
@@ -117,7 +122,8 @@ def logout(user, message):
 
 @socketio.on("check_in")
 @login_required
-def check_in(user, message):
+def check_in(user, message):  # pylint: disable=unused-argument
+    """ Update last seen time for a player. """
 
     user.ping()
     LOGGER.debug(f"{user.last_seen}: {user.name} checked in")
@@ -138,6 +144,7 @@ def test_disconnect():
 
 
 def monitor_players():
+    """ Watch for players who haven't pinged the server in a while and log them out. """
     with app.app_context():
         while True:
             for user_id in list(PLAYERS.keys()):

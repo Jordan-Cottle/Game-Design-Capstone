@@ -1,9 +1,13 @@
+""" Package for containing server setup and logic. """
+# pylint: disable=wrong-import-position
+
 import os
 
 import flask
-from data.json_util import TYPE_META, Decoder, Encoder, Serializable
 from flask import Flask
 from flask_socketio import SocketIO
+
+from data.json_util import TYPE_META, Decoder, Encoder, Serializable
 
 socketio = SocketIO()
 
@@ -20,6 +24,7 @@ _make_response = app.make_response
 
 
 def convert_custom_object(obj):
+    """ Handle custom objects via the json module. """
 
     if not isinstance(obj, Serializable):
         return _make_response(obj)

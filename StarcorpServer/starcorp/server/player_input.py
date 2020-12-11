@@ -2,7 +2,7 @@
 
 
 from flask_socketio import emit
-from global_context import PLAYERS, RESOURCE_NODES
+from global_context import RESOURCE_NODES
 from world.coordinates import Coordinate
 
 from server import login_required, socketio
@@ -16,6 +16,7 @@ LOGGER = get_logger(__name__)
 @socketio.on("player_move")
 @login_required
 def move_player(user, message):
+    """ Handle request for player movement. """
 
     player = Player.by_user(user)
 
@@ -27,7 +28,7 @@ def move_player(user, message):
     try:
         player.move_to(destination)
     except ValueError:
-        LOGGER.warn(f"{player} movement to {destination} denied!")
+        LOGGER.warning(f"{player} movement to {destination} denied!")
         emit(
             "movement_denied",
             {"message": f"Unable to move to {destination} from {player.position}"},
@@ -43,6 +44,7 @@ def move_player(user, message):
 @socketio.on("gather_resource")
 @login_required
 def gather_resource(user, message):
+    """ Process gather resource request from player. """
 
     player = Player.by_user(user)
 
@@ -51,14 +53,14 @@ def gather_resource(user, message):
 
     if target not in RESOURCE_NODES:
         message = f"{player} unable to gather at {target}: No resource node present"
-        LOGGER.warn(message)
+        LOGGER.warning(message)
         emit(
             "gather_denied",
             {"message": message},
         )
     elif target != player.position:
         message = f"{player} unable to gather at {target}: Too far away"
-        LOGGER.warn(message)
+        LOGGER.warning(message)
         emit("gather_denied", {"message": message})
     else:
         resource = RESOURCE_NODES[target]
@@ -72,6 +74,8 @@ def gather_resource(user, message):
 @socketio.on("sell_resource")
 @login_required
 def sell_resource(user, message):
+    """ Process resource sell request from a player. """
+
     player = Player.by_user(user)
 
     city = City.get(message["city_id"])
@@ -80,7 +84,7 @@ def sell_resource(user, message):
 
     if player.position != city.position:
         message = f"{player} unable to sell to {city}: Too far away"
-        LOGGER.warn(message)
+        LOGGER.warning(message)
         emit(
             "gather_denied",
             {"message": message},

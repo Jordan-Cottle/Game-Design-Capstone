@@ -1,9 +1,7 @@
-import sys
+""" Module for providing user classes and logic. """
 import time
 from hashlib import sha256
-from uuid import uuid4
 
-from data import STORAGE_DIR
 from data.json_util import Serializable
 
 
@@ -16,9 +14,11 @@ class User(Serializable):
 
     @property
     def id(self):
+        """ Compute the id for a user. """
         return str(sha256(self.name.encode()).hexdigest())
 
     def ping(self):
+        """ Update the timestamp for when the user was last seen. """
         self.last_seen = time.time()
         self.store(self.id)
 
@@ -30,6 +30,7 @@ class User(Serializable):
 
     @property
     def json(self):
+        """ Return a json serializable representation of the user. """
         data = super().json
 
         data.update(self.__dict__)
@@ -39,7 +40,8 @@ class User(Serializable):
 
     @classmethod
     def load(cls, data):
-        user = User(data["name"])
+        """ Load the user from a data dictionary. """
+        user = cls(data["name"])
 
         user.__dict__.update(data)
 

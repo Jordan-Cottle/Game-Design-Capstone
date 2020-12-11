@@ -1,9 +1,9 @@
 """ A Layer contains a map of data about every Tile in a sector. """
 import json
 
-from data.json_util import Serializable, from_json
+from data import Serializable, from_json
 
-from world.coordinates import Coordinate
+from world import Coordinate
 
 
 class Layer(Serializable):
@@ -26,12 +26,14 @@ class Layer(Serializable):
 
     @property
     def json(self):
+        """ Return a json serializable form of the layer. """
         data = super().json
         data.update({coordinate.json: value for coordinate, value in self.data.items()})
         return data
 
     @classmethod
     def load(cls, data):
+        """ Reinstantiate a layer from a data dictionary. """
         super().load(data)
 
         layer = cls()
@@ -40,8 +42,6 @@ class Layer(Serializable):
 
             if isinstance(value, dict):
                 value = json.loads(value, object_hook=from_json)
-            else:
-                value = value
 
             layer[coordinate] = value
 

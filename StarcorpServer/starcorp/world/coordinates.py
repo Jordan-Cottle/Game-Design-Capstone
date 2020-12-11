@@ -7,7 +7,7 @@ from data.json_util import Serializable
 class Coordinate(Serializable):
     """A cubic coordinate vector.
 
-    This class guarentees that all instances lie on the x+y+z = 0 plane.
+    This class guarantees that all instances lie on the x+y+z = 0 plane.
     """
 
     def __init__(self, x, y, z):

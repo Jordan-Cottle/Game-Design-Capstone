@@ -1,3 +1,5 @@
+""" Package for defining various game objects. """
+
 from .gameobject import GameObject
 
 from .resource import *

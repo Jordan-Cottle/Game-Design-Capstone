@@ -1,3 +1,5 @@
+""" Module for providing global resource data. """
+
 from objects import FOOD, WATER, FUEL
 
 from world.coordinates import Coordinate

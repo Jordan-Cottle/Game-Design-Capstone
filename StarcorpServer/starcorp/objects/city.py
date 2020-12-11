@@ -1,6 +1,6 @@
-from flask import json
+""" Module for providing city related classes and logic. """
 
-from objects import FOOD, FUEL, WATER, GameObject
+from objects import FOOD, FUEL, WATER, GameObject, Resource
 
 from world.coordinates import Coordinate
 from global_context import CITIES
@@ -28,6 +28,7 @@ class City(GameObject):
 
     @property
     def json(self):
+        """ Get json serializable form of a city. """
         data = super().json
         data["name"] = self.name
         data["population"] = self.population
@@ -39,7 +40,7 @@ class City(GameObject):
 
     @classmethod
     def load(cls, data):
-
+        """ Reinstantiate a city from a data dictionary. """
         city = super().load(data)
         city.name = data["name"]
         city.population = data["population"]
@@ -48,10 +49,11 @@ class City(GameObject):
             Resource.retrieve(name): value for name, value in data["resources"].items()
         }
 
-        return player
+        return city
 
     @property
     def growth(self):
+        """ Calculate growth for the city. """
         total_outstanding_demand = sum(
             (self.demand(resource) - self.volume(resource)) * resource.growth_weight
             for resource in self.resources
@@ -66,13 +68,16 @@ class City(GameObject):
         return int(growth)
 
     def volume(self, resource):
+        """ Return amount of a given resource available in the city. """
         return self.resources[resource]
 
     def demand(self, resource):
+        """ Calculate demand for a resource in the city. """
         demand = self.population * resource.demand_ratio
         return int(demand)
 
     def tick(self):
+        """ Process a game tick on the city. """
         for resource in self.resources:
             self.resources[resource] -= self.demand(resource)
 
@@ -82,6 +87,7 @@ class City(GameObject):
         self.population += self.growth
 
     def sell(self, resource, volume):
+        """ Add resources to the city and return the total price of those resources. """
         value = resource.cost(self.demand(resource)) * volume
         LOGGER.info(f"{volume} units of {resource} sold to {self} for ${value}")
         self.resources[resource] += volume

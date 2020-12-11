@@ -12,4 +12,6 @@ while getopts "c" arg; do
   esac
 done
 
-python starcorp/app.py
+pushd starcorp
+python app.py
+popd

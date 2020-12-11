@@ -40,6 +40,7 @@ class GameObject(Serializable):
         return obj
 
     def move_to(self, position):
+        """ Move a game object to a new position. """
         if not self.valid_position(position):
             raise ValueError(f"{position} is invalid for {self}")
 
@@ -47,4 +48,5 @@ class GameObject(Serializable):
 
     @staticmethod
     def get(uuid):
+        """ Get the game object from storage based on its uuid. """
         return GameObject.objects.get(uuid)

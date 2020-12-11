@@ -1,1 +1,3 @@
+""" Global player data. """
+
 PLAYERS = {}

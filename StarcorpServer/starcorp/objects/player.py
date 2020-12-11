@@ -1,8 +1,7 @@
-from objects.gameobject import GameObject
+""" Module for providing player class and logic. """
 
 from global_context import PLAYERS
-
-from objects import ALL_RESOURCES, User, Resource
+from objects import ALL_RESOURCES, GameObject, Resource, User
 
 
 class Player(GameObject):
@@ -18,6 +17,8 @@ class Player(GameObject):
 
     @classmethod
     def create(cls, name, user):
+        """ Create a new player. """
+
         player = cls()
         player.name = name
         player.user = user
@@ -32,13 +33,19 @@ class Player(GameObject):
 
     @staticmethod
     def by_user(user):
+        """ Get player associated with a user. """
+
         return PLAYERS[user.id]
 
     def held(self, resource):
+        """ Get amount of resource held by a player. """
+
         return self.resources[resource]
 
     @property
     def json(self):
+        """ Convert player to a json serializable format. """
+
         data = super().json
         data["name"] = self.name
 
@@ -52,6 +59,7 @@ class Player(GameObject):
 
     @classmethod
     def load(cls, data):
+        """ Load a player from a data dictionary. """
 
         player = super().load(data)
         player.name = data["name"]
@@ -67,10 +75,12 @@ class Player(GameObject):
         return player
 
     def valid_position(self, position):
+        """ Check if a player can move to a position directly. """
+
         return position in self.position.neighbors
 
     def __str__(self):
         return f"{self.name} @ {self.position}"
 
     def __repr__(self):
-        return f"Player ({self.name}): {self.uuid}"
+        return f"Player ({self.name}): {self.uuid} @ {self.position}"

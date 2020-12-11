@@ -1,3 +1,5 @@
+""" Module for resource related classes and logic. """
+
 from data.json_util import Serializable
 
 
@@ -12,16 +14,18 @@ class Resource(Serializable):
         self.base_price = base_price
 
     def cost(self, demand):
+        """ Calculate price for a single unit. """
         return self.base_price + (demand / 10000)
 
     def __eq__(self, other):
-        self.name == other.name
+        return self.name == other.name
 
     def __hash__(self):
         return hash(self.name)
 
     @property
     def json(self):
+        """ Get json serializable form. """
         data = super().json
 
         data.update(self.__dict__)
@@ -30,6 +34,7 @@ class Resource(Serializable):
 
     @classmethod
     def load(cls, data):
+        """ reinstantiate Resource from data dictionary. """
         super().load(data)
 
         return cls(**data)
