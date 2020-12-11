@@ -8,6 +8,9 @@ from world.coordinates import Coordinate
 from server import login_required, socketio
 
 from objects import Player, City, ALL_RESOURCES
+from utils import get_logger
+
+LOGGER = get_logger(__name__)
 
 
 @socketio.on("player_move")
@@ -17,13 +20,14 @@ def move_player(user, message):
     player = Player.by_user(user)
 
     destination = Coordinate.load(message["destination"])
-    print(f"Processing player movement request to {destination}")
+    LOGGER.debug(f"Processing player movement request to {destination}")
 
     # TODO: Spend AP for movement
 
     try:
         player.move_to(destination)
     except ValueError:
+        LOGGER.warn(f"{player} movement to {destination} denied!")
         emit(
             "movement_denied",
             {"message": f"Unable to move to {destination} from {player.position}"},
@@ -43,16 +47,19 @@ def gather_resource(user, message):
     player = Player.by_user(user)
 
     target = Coordinate.load(message["target"])
+    LOGGER.debug(f"{player} attempting to gather at {target}")
 
     if target not in RESOURCE_NODES:
+        message = f"{player} unable to gather at {target}: No resource node present"
+        LOGGER.warn(message)
         emit(
             "gather_denied",
-            {"message": f"Unable to gather at {target}: No resource node present"},
+            {"message": message},
         )
     elif target != player.position:
-        emit(
-            "gather_denied", {"message": f"Unable to gather at {target}: Too far away"}
-        )
+        message = f"{player} unable to gather at {target}: Too far away"
+        LOGGER.warn(message)
+        emit("gather_denied", {"message": message})
     else:
         resource = RESOURCE_NODES[target]
 
@@ -69,10 +76,14 @@ def sell_resource(user, message):
 
     city = City.get(message["city_id"])
 
+    LOGGER.debug(f"{player} attempting to sell to {city}")
+
     if player.position != city.position:
+        message = f"{player} unable to sell to {city}: Too far away"
+        LOGGER.warn(message)
         emit(
             "gather_denied",
-            {"message": f"Unable to gather at {target}: No resource node present"},
+            {"message": message},
         )
     else:
         for resource in ALL_RESOURCES:
@@ -83,6 +94,8 @@ def sell_resource(user, message):
                 continue
             else:
                 volume = 5
+
+            LOGGER.info(f"{player} selling {volume} {resource} units to {city}")
 
             player.resources[resource] -= volume
             profit = city.sell(resource, volume)

@@ -13,6 +13,9 @@ from world.coordinates import Coordinate
 
 from server import HttpError, app, socketio
 from objects import User
+from utils import get_logger
+
+LOGGER = get_logger(__name__)
 
 INACTIVE_TIMEOUT = 30
 
@@ -43,13 +46,13 @@ class UnauthorizedError(HttpError):
 
 @app.route("/health")
 def health():
-    print("Health checked")
+    LOGGER.debug("Health checked")
     return {"status": "okay"}
 
 
 @app.route("/test", methods=["POST"])
 def test_post():
-    print("post received")
+    LOGGER.debug("Test POST received")
 
     return {"hello": "world"}
 
@@ -57,7 +60,7 @@ def test_post():
 @socketio.on("login")
 def socket_login(message):
 
-    print(f"Login requested: {message}")
+    LOGGER.info(f"Login requested: {message}")
     try:
         player_name = message["name"]
     except KeyError:
@@ -78,7 +81,7 @@ def socket_login(message):
 def load_player(user, message):
     # TODO: Handle authentication
 
-    print("Loading player")
+    LOGGER.info("Loading player for {user}")
 
     for player in PLAYERS.values():
         emit("player_joined", player.json)
@@ -87,12 +90,12 @@ def load_player(user, message):
 
     if user_id in PLAYERS:
         player = PLAYERS[user_id]
-        print("Existing player loaded")
+        LOGGER.debug("Existing player loaded")
     else:
         player = Player.create(user.name, user)
 
         player.position = Coordinate(-4, 1, 3)
-        print("New player created")
+        LOGGER.info("New player created")
 
     emit("player_load", player.json)
     emit("player_joined", player.json, broadcast=True, include_self=False)
@@ -102,7 +105,7 @@ def load_player(user, message):
 @login_required
 def logout(user, message):
 
-    print(f"Player logging out: {message}")
+    LOGGER.info(f"Player logging out: {message}")
     if not isinstance(message, dict):
         message = json.loads(message)
 
@@ -117,21 +120,21 @@ def logout(user, message):
 def check_in(user, message):
 
     user.ping()
-    print(f"{user.last_seen}: {user.name} checked in")
+    LOGGER.debug(f"{user.last_seen}: {user.name} checked in")
 
 
 @socketio.on("connect")
 def test_connect():
     """ Handle new socket connections. """
 
-    print("Client connecting!")
+    LOGGER.debug("Client connecting!")
 
 
 @socketio.on("disconnect")
 def test_disconnect():
     """ Handle sockets being disconnected. """
 
-    print("Client disconnected")
+    LOGGER.debug("Client disconnected")
 
 
 def monitor_players():
@@ -142,7 +145,7 @@ def monitor_players():
                 if time.time() - user.last_seen > INACTIVE_TIMEOUT:
                     player = PLAYERS.pop(user_id)
 
-                    print(f"Logging out {player}")
+                    LOGGER.info(f"Logging out {player} due to inactivity")
 
                     socketio.emit("player_logout", player.json)
 
