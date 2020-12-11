@@ -2,12 +2,15 @@
 # pylint: disable=wrong-import-position
 
 import os
+import logging
+from logging.handlers import RotatingFileHandler
 
 import flask
 from flask import Flask
 from flask_socketio import SocketIO
 
-from data.json_util import TYPE_META, Decoder, Encoder, Serializable
+from utils.logging import FORMATTER
+from data import TYPE_META, Decoder, Encoder, Serializable
 
 socketio = SocketIO()
 
@@ -36,7 +39,13 @@ def convert_custom_object(obj):
 
 app.make_response = convert_custom_object
 
-socketio.init_app(app, json=flask.json)
+
+LOGGER = logging.getLogger("socketio")
+handler = RotatingFileHandler("socketio.log", maxBytes=1024 * 10, backupCount=5)
+handler.setFormatter(FORMATTER)
+LOGGER.setLevel(logging.DEBUG)
+LOGGER.addHandler(handler)
+socketio.init_app(app, json=flask.json, logger=LOGGER)
 
 
 # Core imports
