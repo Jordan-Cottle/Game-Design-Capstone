@@ -85,7 +85,7 @@ def load_player(user, message):  # pylint: disable=unused-argument
 
     # TODO: Handle authentication
 
-    LOGGER.info("Loading player for {user}")
+    LOGGER.info(f"Loading player for {user}")
 
     for player in PLAYERS.values():
         emit("player_joined", player.json)
