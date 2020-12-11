@@ -1,0 +1,15 @@
+logging:
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  console: True
+  socketio:
+    level: 10  # Debug
+    handler:
+      filename: socketio.log
+      maxBytes: 10485760
+      backupCount: 2
+  application:
+    level: 10  # Debug
+    handler:
+      filename: starcorp.log
+      maxBytes: 10485760
+      backupCount: 5

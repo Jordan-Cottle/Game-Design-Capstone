@@ -6,5 +6,6 @@
 
 secrets/
 data/
+!starcorp/data
 
 *.log
