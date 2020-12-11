@@ -4,6 +4,9 @@ from objects import FOOD, FUEL, WATER, GameObject
 
 from world.coordinates import Coordinate
 from global_context import CITIES
+from utils import get_logger
+
+LOGGER = get_logger(__name__)
 
 
 class City(GameObject):
@@ -80,10 +83,10 @@ class City(GameObject):
 
     def sell(self, resource, volume):
         value = resource.cost(self.demand(resource)) * volume
-        print(f"{volume} units of {resource} sold to {self}")
+        LOGGER.info(f"{volume} units of {resource} sold to {self} for ${value}")
         self.resources[resource] += volume
 
-        print(self.resources[resource], "units in stock at {self}")
+        LOGGER.debug(f"{self.resources[resource]} units in stock at {self}")
         return value
 
     def __str__(self):
