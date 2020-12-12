@@ -1,5 +1,6 @@
 logging:
   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  date_format: "%y-%j %H:%M:%S"
   console: True
   socketio:
     level: 10  # Debug

@@ -12,7 +12,9 @@ from data import CONFIG
 LOGGING_CONFIG = CONFIG.get("logging.application")
 
 # create formatter
-FORMATTER = logging.Formatter(CONFIG.get("logging.format"))
+FORMATTER = logging.Formatter(
+    CONFIG.get("logging.format"), datefmt=CONFIG.get("logging.date_format")
+)
 
 LOGGER_NAME = "starcorp"
 # create logger
