@@ -1,6 +1,7 @@
 """ Module for defining user related models. """
 
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
 
 from models import Base
 
@@ -15,6 +16,8 @@ class User(Base):
     name = Column(String, nullable=False)
     salt = Column(String, nullable=False)
     password = Column(String, nullable=False)
+
+    ship = relationship("Ship", backref="owner", cascade="all, delete-orphan")
 
     def __str__(self) -> str:
         return f"{self.name}"

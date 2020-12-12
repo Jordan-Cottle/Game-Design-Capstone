@@ -14,3 +14,17 @@ class Resource(str, Enum):
     WATER = "water"
     FUEL = "fuel"
     ORE = "ore"
+
+
+class ShipSystemAttributeType(str, Enum):
+    """ Enumeration of all possible ship system attributes. """
+
+    HARD_POINT_COST = "hard point cost"
+    MODULE_COST = "module cost"
+    COMPONENT_COST = "component cost"
+    BASE_PRICE = "base price"
+
+    MIN_POWER_DRAW = "minimum power draw"
+    MAX_POWER_DRAW = "maximum power draw"
+
+    POWER_EFFICIENCY = "power efficiency"
