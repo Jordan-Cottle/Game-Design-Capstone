@@ -1,6 +1,5 @@
 """ Module for logging configuration. """
 
-import os
 import sys
 import logging
 

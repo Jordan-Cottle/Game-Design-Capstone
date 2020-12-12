@@ -31,5 +31,8 @@ class Config:
 
         return curr
 
+    def __str__(self) -> str:
+        return f"Config file: {self.file_name}"
+
 
 CONFIG = Config()
