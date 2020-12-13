@@ -6,6 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 from .city import City, CityResource
+from .entities import Routine, Structure, Unit
 from .resources import ResourceType
 from .ships import (
     Ship,

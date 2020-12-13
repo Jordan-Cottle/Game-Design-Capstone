@@ -53,3 +53,14 @@ class StructureType(str, Enum):
     RESOURCE_YARD = "resource yard"
     FACTORY = "factory"
     TURRET = "turret"
+
+
+class Action(str, Enum):
+    """ Enumeration of available game actions. """
+
+    ATTACK = "attack"
+    GATHER = "gather"
+    BUY = "buy"
+    SELL = "sell"
+    MOVE = "move"
+    WAIT = "wait"
