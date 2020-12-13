@@ -93,13 +93,14 @@ class Ship(Base):
     id = Column(Integer, primary_key=True)
 
     active = Column(Boolean)
-    position = Column(String)  # <x, y, z>
 
+    location_id = Column(Integer, ForeignKey("Location.id"), nullable=False, index=True)
     owner_id = Column(Integer, ForeignKey("User.id"), nullable=False, index=True)
     chassis_id = Column(
         Integer, ForeignKey("ShipChassis.id"), nullable=False, index=True
     )
 
+    location = relationship("Location", backref="ships")
     owner = relationship("User", backref="ship")
     chassis = relationship("ShipChassis", backref="ships")
     loadout = relationship(
@@ -110,14 +111,14 @@ class Ship(Base):
     )
 
     def __str__(self) -> str:
-        return f"{self.owner.name}'s {self.chassis} ship at {self.position}"
+        return f"{self.owner.name}'s {self.chassis} ship at {self.location}"
 
     def __repr__(self) -> str:
         return (
             "Ship("
             f"id={self.id}, "
             f"active={self.active}, "
-            f"position='{self.position}', "
+            f"location_id='{self.location_id}', "
             f"owner_id={self.owner_id}, "
             f"chassis_id={self.chassis_id})"
         )

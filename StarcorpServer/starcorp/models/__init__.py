@@ -16,4 +16,4 @@ from .ships import (
     ShipSystemAttribute,
 )
 from .user import User
-from .world import ResourceNode, Sector, Tile
+from .world import Location, ResourceNode, Sector, Tile

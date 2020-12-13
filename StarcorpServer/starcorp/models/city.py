@@ -13,11 +13,11 @@ class City(Base):
     id = Column(Integer, primary_key=True)
 
     name = Column(String, unique=True, nullable=False)
-    position = Column(String, nullable=False)  # <x, y, z>
     population = Column(Integer, nullable=False)
 
-    sector_id = Column(Integer, ForeignKey("Sector.id"), nullable=False, index=True)
-    sector = relationship("Sector", backref="cities")
+    location_id = Column(Integer, ForeignKey("Location.id"), nullable=False, index=True)
+    location = relationship("Location")
+
     resources = relationship(
         "CityResource", backref="city", cascade="all, delete-orphan"
     )
@@ -32,7 +32,7 @@ class City(Base):
             f"name='{self.name}', "
             f"position={self.position}, "
             f"population={self.population}, "
-            f"sector_id={self.sector_id})"
+            f"location_id={self.location_id})"
         )
 
 
