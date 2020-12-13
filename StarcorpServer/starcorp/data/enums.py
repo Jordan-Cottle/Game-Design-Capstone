@@ -37,3 +37,19 @@ class ShipSystemAttributeType(str, Enum):
     MAX_POWER_DRAW = "maximum power draw"
 
     POWER_EFFICIENCY = "power efficiency"
+
+
+class UnitType(str, Enum):
+    """ Enumeration of all unit types in the game. """
+
+    TRANSPORT = "transport"
+    RAIDER = "raider"
+    ALIEN = "alien"
+
+
+class StructureType(str, Enum):
+    """ Enumeration of all structure types in the game. """
+
+    RESOURCE_YARD = "resource yard"
+    FACTORY = "factory"
+    TURRET = "turret"
