@@ -15,3 +15,4 @@ from .ships import (
     ShipSystemAttribute,
 )
 from .user import User
+from .world import ResourceNode, Sector, Tile
