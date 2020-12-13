@@ -3,6 +3,15 @@
 from enum import Enum
 
 
+class TileType(int, Enum):
+    """ Enum for types of tiles in the world. """
+
+    SPACE = 0
+    GROUND = 1
+    WATER = 2
+    STAR = 3
+
+
 class Resource(str, Enum):
     """Enumeration of all resource types in the game.
 
