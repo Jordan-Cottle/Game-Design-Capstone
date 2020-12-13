@@ -5,6 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
+from .city import City, CityResource
 from .resources import ResourceType
 from .ships import (
     Ship,
