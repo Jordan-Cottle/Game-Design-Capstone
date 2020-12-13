@@ -2,4 +2,3 @@
 
 from .coordinates import Coordinate
 from .layer import Layer
-from .tile_type import TileType

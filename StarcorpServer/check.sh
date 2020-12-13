@@ -11,6 +11,7 @@ fi
 status=0
 for name in $(ls); do
     if [[ -d $name ]]; then
+        echo "$(pwd)/$name/*"
         pylint $name
         stat=$?
         if [[ $stat -ne 0 ]]; then

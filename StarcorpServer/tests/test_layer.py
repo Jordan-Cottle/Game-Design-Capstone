@@ -1,6 +1,6 @@
 import pytest
 from world.layer import Layer
-from world.tile_type import TileType
+from data import TileType
 
 
 @pytest.fixture(name="tilemap")

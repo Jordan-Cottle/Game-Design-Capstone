@@ -1,5 +1,4 @@
 """ The game world uses a hexagon tile grid indexed by cube cooridnates alone a plane. """
-import json
 
 from data.json_util import Serializable
 

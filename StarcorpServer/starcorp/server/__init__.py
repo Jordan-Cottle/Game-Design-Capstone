@@ -10,7 +10,7 @@ from flask import Flask
 from flask_socketio import SocketIO
 
 from utils.logging import FORMATTER
-from data import TYPE_META, Decoder, Encoder, Serializable
+from data import TYPE_META, Decoder, Encoder, Serializable, CONFIG
 
 socketio = SocketIO()
 
@@ -41,9 +41,10 @@ app.make_response = convert_custom_object
 
 
 LOGGER = logging.getLogger("socketio")
-handler = RotatingFileHandler("socketio.log", maxBytes=1024 * 10, backupCount=5)
+log_config = CONFIG.get("logging.socketio")
+handler = RotatingFileHandler(**log_config["handler"])
 handler.setFormatter(FORMATTER)
-LOGGER.setLevel(logging.DEBUG)
+LOGGER.setLevel(log_config["level"])
 LOGGER.addHandler(handler)
 socketio.init_app(app, json=flask.json, logger=LOGGER)
 
