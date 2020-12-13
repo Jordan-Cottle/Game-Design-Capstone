@@ -30,7 +30,7 @@ class City(Base):
             "City("
             f"id={self.id}, "
             f"name='{self.name}', "
-            f"position={self.position}, "
+            f"location={self.location}, "
             f"population={self.population}, "
             f"location_id={self.location_id})"
         )
