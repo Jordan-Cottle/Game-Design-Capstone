@@ -185,6 +185,7 @@ def load_player(message):  # pylint: disable=unused-argument
         LOGGER.debug(f"Existing player loaded for {current_user}")
     else:
         player = Player.create(current_user.name, current_user.value)
+        PLAYERS[user_id] = player
 
         player.position = Coordinate(-4, 1, 3)
         LOGGER.info(f"New player created for {current_user}")
@@ -219,15 +220,18 @@ def on_connect():
 @socketio.on("disconnect")
 def on_disconnect():
     """ Handle sockets being disconnected. """
-
     try:
-        player = PLAYERS.pop(current_user.id)
+        user_id = current_user.id
     except ProxyAccessError:
         LOGGER.debug("Disconnecting client that failed to log in.")
     else:
-        emit("player_logout", player.json, broadcast=True)
-        player.store(player.uuid)
-        LOGGER.debug(f"{current_user} disconnected")
+        if user_id in PLAYERS:
+            player = PLAYERS[user_id]
+            emit("player_logout", player.json, broadcast=True)
+            player.store(player.uuid)
+            LOGGER.debug(f"{current_user} disconnected")
+        else:
+            LOGGER.debug(f"{current_user}'s player already removed from world")
         current_user.pop()
 
     database_session.close()
@@ -236,29 +240,31 @@ def on_disconnect():
 
 def monitor_players():
     """ Watch for players who haven't pinged the server in a while and log them out. """
+
+    def check_players(db_session):
+        for user_id in list(PLAYERS.keys()):
+            user = get_user(db_session, user_id)
+            deadline = datetime.today() - timedelta(seconds=INACTIVE_TIMEOUT)
+            inactive = user.last_seen < deadline
+            LOGGER.debug(
+                f"Checking {user} for inactivity: "
+                f"{user.last_seen.strftime('%H:%M:%S')} "
+                f"< {deadline.strftime('%H:%M:%S')} "
+                f"== {inactive}"
+            )
+            if inactive:
+                player = PLAYERS.pop(user_id)
+
+                LOGGER.info(f"Logging out {player} due to inactivity")
+
+                socketio.emit("player_logout", player.json)
+
+                player.store(player.uuid)
+
     with app.app_context():
-        db_session = DatabaseSession()
         while True:
-            for user_id in list(PLAYERS.keys()):
-                user = get_user(db_session, user_id)
-                deadline = datetime.today() - timedelta(seconds=INACTIVE_TIMEOUT)
-                inactive = user.last_seen < deadline
-                LOGGER.debug(
-                    f"Checking {user} for inactivity: "
-                    f"{user.last_seen.strftime('%H:%M:%S')} "
-                    f"< {deadline.strftime('%H:%M:%S')} "
-                    f"== {inactive}"
-                )
-                if inactive:
-                    player = PLAYERS.pop(user_id)
-
-                    LOGGER.info(f"Logging out {player} due to inactivity")
-
-                    socketio.emit("player_logout", player.json)
-
-                    user.store(user.id)
-                    player.store(player.uuid)
-
+            with DatabaseSession() as db_session:
+                check_players(db_session)
             eventlet.sleep(5)
 
 
