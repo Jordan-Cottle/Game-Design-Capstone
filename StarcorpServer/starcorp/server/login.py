@@ -5,15 +5,16 @@ from functools import wraps
 from http import HTTPStatus
 
 import eventlet
+from database import DatabaseSession, create_user, get_user, login_user
 from flask import request, session
-from flask_socketio import emit, disconnect
-
+from flask_socketio import disconnect, emit
 from global_context import PLAYERS
 from objects import Player, User
 from server import HttpError, app, socketio
 from utils import get_logger
 from world import Coordinate
 
+from server import HttpError, app, socketio
 
 LOGGER = get_logger(__name__)
 
@@ -26,38 +27,65 @@ class UnauthorizedError(HttpError):
     response_code = HTTPStatus.UNAUTHORIZED
 
 
-class SessionProxy:
-    """ Proxy object for accessing currently logged in user. """
+class ProxyAccessError(Exception):
+    """ Error for when access via a proxy object fails. """
 
-    def __init__(self) -> None:
-        self.users = {}
+
+class SessionProxy:
+    """ Proxy object for accessing currently session context easily. """
+
+    def __init__(self, name) -> None:
+        self.name = name
+        self.objects = {}
 
     def __getattr__(self, name):
-        """ Route requests for attributes to the currently logged in user. """
-        try:
-            return getattr(self.value, name)
-        except KeyError as error:
-            raise UnauthorizedError(
-                f"{request.event} requires a logged in user, but none was found"
-            ) from error
+        """ Route requests for attributes to the proxied object. """
+        return getattr(self.value, name)
 
     @property
     def value(self):
-        """ Get a reference to the underlying User. """
-        return self.users[session["session_id"]]
+        """ Get a reference to the proxied object. """
+        try:
+            return self.objects[session["session_id"]]
+        except KeyError as error:
+            raise ProxyAccessError(f"{self.name} proxy access failed") from error
 
-    def login(self, user):
-        """ Add user to tracked users. """
+    def push(self, obj):
+        """ Add object to tracked objects. """
 
-        LOGGER.debug(f"Setting {user} into session {request.sid}")
+        LOGGER.debug(f"Setting {obj} into session {request.sid}")
         session["session_id"] = request.sid
-        self.users[request.sid] = user
+        self.objects[request.sid] = obj
+
+    def pop(self):
+        """ Remove object from proxy stash. """
+        return self.objects.pop(request.sid)
+
+    def __enter__(self):
+        """ Pass along context manager request to proxied object. """
+
+        return self.value.__enter__()
+
+    def __exit__(self, *args):
+        """ Pass on context manager exit to proxied object. """
+
+        return self.value.__exit__(*args)
 
     def __str__(self) -> str:
-        return str(self.users[session["session_id"]])
+        try:
+            return f"{self.value}"
+        except ProxyAccessError:
+            return f"{self.name} proxy with no value in current context"
+
+    def __repr__(self) -> str:
+        try:
+            return f"{self.name} proxy: current={self.value}"
+        except ProxyAccessError:
+            return f"{self.name} proxy: current=None"
 
 
-current_user = SessionProxy()
+current_user = SessionProxy("user")
+database_session = SessionProxy("database session")
 
 
 @socketio.on_error()  # Handles the default namespace
@@ -112,8 +140,8 @@ def socket_login(message):
     user = User(player_name)
 
     user.store(user.id)
-
-    current_user.login(user)
+    # Push user into the proxy object for later reference
+    current_user.push(user)
 
     LOGGER.info(f"{user} successfully logged in")
     emit("login_accepted", user)
@@ -171,22 +199,29 @@ def check_in(message):  # pylint: disable=unused-argument
 
 
 @socketio.on("connect")
-def test_connect():
+def on_connect():
     """ Handle new socket connections. """
 
     LOGGER.debug("Client connecting!")
+    database_session.push(DatabaseSession())
 
 
 @socketio.on("disconnect")
-def test_disconnect():
+def on_disconnect():
     """ Handle sockets being disconnected. """
 
-    player = PLAYERS.pop(current_user.id)
-    emit("player_logout", player.json, broadcast=True)
+    try:
+        player = PLAYERS.pop(current_user.id)
+    except ProxyAccessError:
+        LOGGER.debug("Disconnecting client that failed to log in.")
+    else:
+        emit("player_logout", player.json, broadcast=True)
+        player.store(player.uuid)
+        LOGGER.debug(f"{current_user} disconnected")
+        current_user.pop()
 
-    player.store(player.uuid)
-
-    LOGGER.debug(f"{current_user} disconnected")
+    database_session.close()
+    database_session.pop()
 
 
 def monitor_players():
