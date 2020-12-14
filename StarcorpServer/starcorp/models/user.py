@@ -1,9 +1,15 @@
 """ Module for defining user related models. """
 
-from sqlalchemy import Column, Integer, String
+from datetime import datetime
+
+from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 
 from models import Base
+
+from utils import get_logger
+
+LOGGER = get_logger(__name__)
 
 
 class User(Base):
@@ -17,7 +23,15 @@ class User(Base):
     salt = Column(String, nullable=False)
     password = Column(String, nullable=False)
 
+    last_seen = Column(DateTime, default=datetime.today, nullable=False)
+
     ship = relationship("Ship", cascade="all, delete-orphan")
+
+    def ping(self):
+        """ Update last seen time. """
+
+        self.last_seen = datetime.today()
+        LOGGER.debug(f"{self.name} ping at {self.last_seen.strftime('%H:%M:%S')}")
 
     def __str__(self) -> str:
         return f"{self.name}"

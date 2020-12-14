@@ -1,7 +1,7 @@
 """ Module for providing player class and logic. """
 
 from global_context import PLAYERS
-from objects import ALL_RESOURCES, GameObject, Resource, User
+from objects import ALL_RESOURCES, GameObject, Resource
 
 
 class Player(GameObject):
@@ -11,7 +11,7 @@ class Player(GameObject):
         super().__init__()
         self.name = "Player"
 
-        self.user = None
+        self.user_id = None
         self.resources = {}
         self.money = 0
 
@@ -21,7 +21,7 @@ class Player(GameObject):
 
         player = cls()
         player.name = name
-        player.user = user
+        player.user_id = user.id
         player.resources = {resource: 0 for resource in ALL_RESOURCES}
         player.money = 100
 
@@ -49,7 +49,7 @@ class Player(GameObject):
         data = super().json
         data["name"] = self.name
 
-        data["user"] = self.user.json
+        data["user_id"] = self.user_id
         data["resources"] = {
             resource.name: value for resource, value in self.resources.items()
         }
@@ -64,7 +64,7 @@ class Player(GameObject):
         player = super().load(data)
         player.name = data["name"]
 
-        player.user = User.load(data["user"])
+        player.user_id = data["user_id"]
         player.resources = {
             Resource.retrieve(resource): value
             for resource, value in data["resources"].items()
