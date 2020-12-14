@@ -5,7 +5,8 @@ from functools import wraps
 from http import HTTPStatus
 
 import eventlet
-from flask_socketio import emit
+from flask import request, session
+from flask_socketio import emit, disconnect
 
 from global_context import PLAYERS
 from objects import Player, User
@@ -19,6 +20,59 @@ LOGGER = get_logger(__name__)
 INACTIVE_TIMEOUT = 30
 
 
+class UnauthorizedError(HttpError):
+    """ Error for when an unauthorized access is attempted. """
+
+    response_code = HTTPStatus.UNAUTHORIZED
+
+
+class SessionProxy:
+    """ Proxy object for accessing currently logged in user. """
+
+    def __init__(self) -> None:
+        self.users = {}
+
+    def __getattr__(self, name):
+        """ Route requests for attributes to the currently logged in user. """
+        try:
+            return getattr(self.value, name)
+        except KeyError as error:
+            raise UnauthorizedError(
+                f"{request.event} requires a logged in user, but none was found"
+            ) from error
+
+    @property
+    def value(self):
+        """ Get a reference to the underlying User. """
+        return self.users[session["session_id"]]
+
+    def login(self, user):
+        """ Add user to tracked users. """
+
+        LOGGER.debug(f"Setting {user} into session {request.sid}")
+        session["session_id"] = request.sid
+        self.users[request.sid] = user
+
+    def __str__(self) -> str:
+        return str(self.users[session["session_id"]])
+
+
+current_user = SessionProxy()
+
+
+@socketio.on_error()  # Handles the default namespace
+def error_handler(error):
+    """ Handle errors in socketio event handlers. """
+
+    if isinstance(error, UnauthorizedError):
+        LOGGER.exception(f"Unauthorized request detected during {request.event}")
+        disconnect()
+    else:
+        LOGGER.exception(f"An unexpected {error!r} has ocurred during {request}!")
+        disconnect()
+        raise error
+
+
 def login_required(func):
     """Decorator for enforcing a logged in user.
 
@@ -26,28 +80,12 @@ def login_required(func):
     """
 
     @wraps(func)
-    def log_in(*args, **kwargs):
-        try:
-            message = args[0]
-        except IndexError as error:
-            raise UnauthorizedError("Users must log in to access this!") from error
+    def check_log_in(*args, **kwargs):
+        current_user.ping()
 
-        try:
-            user = User.retrieve(message["id"])
-        except KeyError as error:
-            raise UnauthorizedError("Users must log in to access this!") from error
+        return func(*args, **kwargs)
 
-        user.ping()
-
-        return func(user, *args, **kwargs)
-
-    return log_in
-
-
-class UnauthorizedError(HttpError):
-    """ Error for when an unauthorized access is attempted. """
-
-    response_code = HTTPStatus.UNAUTHORIZED
+    return check_log_in
 
 
 @app.route("/health")
@@ -75,31 +113,34 @@ def socket_login(message):
 
     user.store(user.id)
 
+    current_user.login(user)
+
+    LOGGER.info(f"{user} successfully logged in")
     emit("login_accepted", user)
 
 
 @socketio.on("player_load")
 @login_required
-def load_player(user, message):  # pylint: disable=unused-argument
+def load_player(message):  # pylint: disable=unused-argument
     """ Load a player into the world. """
 
     # TODO: Handle authentication
 
-    LOGGER.info(f"Loading player for {user}")
+    LOGGER.info(f"Loading player for {current_user}")
 
     for player in PLAYERS.values():
         emit("player_joined", player.json)
 
-    user_id = user.id
+    user_id = current_user.id
 
     if user_id in PLAYERS:
         player = PLAYERS[user_id]
-        LOGGER.debug("Existing player loaded")
+        LOGGER.debug(f"Existing player loaded for {current_user}")
     else:
-        player = Player.create(user.name, user)
+        player = Player.create(current_user.name, current_user.value)
 
         player.position = Coordinate(-4, 1, 3)
-        LOGGER.info("New player created")
+        LOGGER.info(f"New player created for {current_user}")
 
     emit("player_load", player.json)
     emit("player_joined", player.json, broadcast=True, include_self=False)
@@ -107,14 +148,14 @@ def load_player(user, message):  # pylint: disable=unused-argument
 
 @socketio.on("logout")
 @login_required
-def logout(user, message):
+def logout(message):
     """ Process logout of a player. """
 
     LOGGER.info(f"Player logging out: {message}")
     if not isinstance(message, dict):
         message = json.loads(message)
 
-    player = PLAYERS.pop(user.id)
+    player = PLAYERS.pop(current_user.id)
     emit("player_logout", player.json, broadcast=True)
 
     player.store(player.uuid)
@@ -122,11 +163,11 @@ def logout(user, message):
 
 @socketio.on("check_in")
 @login_required
-def check_in(user, message):  # pylint: disable=unused-argument
+def check_in(message):  # pylint: disable=unused-argument
     """ Update last seen time for a player. """
 
-    user.ping()
-    LOGGER.debug(f"{user.last_seen}: {user.name} checked in")
+    current_user.ping()
+    LOGGER.debug(f"{current_user.last_seen}: {current_user.name} checked in")
 
 
 @socketio.on("connect")
@@ -140,7 +181,12 @@ def test_connect():
 def test_disconnect():
     """ Handle sockets being disconnected. """
 
-    LOGGER.debug("Client disconnected")
+    player = PLAYERS.pop(current_user.id)
+    emit("player_logout", player.json, broadcast=True)
+
+    player.store(player.uuid)
+
+    LOGGER.debug(f"{current_user} disconnected")
 
 
 def monitor_players():
