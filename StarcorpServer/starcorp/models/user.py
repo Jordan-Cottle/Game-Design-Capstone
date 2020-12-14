@@ -17,7 +17,7 @@ class User(Base):
     salt = Column(String, nullable=False)
     password = Column(String, nullable=False)
 
-    ship = relationship("Ship", backref="owner", cascade="all, delete-orphan")
+    ship = relationship("Ship", cascade="all, delete-orphan")
 
     def __str__(self) -> str:
         return f"{self.name}"
