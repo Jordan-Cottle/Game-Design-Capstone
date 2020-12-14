@@ -27,8 +27,6 @@ class Player(GameObject):
 
         player.store(player.uuid)
 
-        PLAYERS[user.id] = player
-
         return player
 
     @staticmethod
