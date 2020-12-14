@@ -75,18 +75,16 @@ class Decoder(JSONDecoder):
         return self.types[object_type].load(data)
 
 
-class Serializable(ABC):
+class Serializable:
     """ Mark a class as serializable by the json module. """
 
     @property
-    @abstractmethod
     def json(self):
         """ Return a json serializable object representing this object. """
 
         return {TYPE_META: type(self).__qualname__}
 
     @classmethod
-    @abstractmethod
     def load(cls, data):
         """ Reinstantiate an object from it's json data. """
 

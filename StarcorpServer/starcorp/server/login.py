@@ -1,6 +1,6 @@
 """ Module for all events related to log in/out. """
 import json
-import time
+from datetime import datetime, timedelta
 from functools import wraps
 from http import HTTPStatus
 
@@ -9,8 +9,7 @@ from database import DatabaseSession, create_user, get_user, login_user
 from flask import request, session
 from flask_socketio import disconnect, emit
 from global_context import PLAYERS
-from objects import Player, User
-from server import HttpError, app, socketio
+from objects import Player
 from utils import get_logger
 from world import Coordinate
 
@@ -93,7 +92,7 @@ def error_handler(error):
     """ Handle errors in socketio event handlers. """
 
     if isinstance(error, UnauthorizedError):
-        LOGGER.exception(f"Unauthorized request detected during {request.event}")
+        LOGGER.exception(f"Unauthorized request detected during {request}")
         disconnect()
     else:
         LOGGER.exception(f"An unexpected {error!r} has ocurred during {request}!")
@@ -124,22 +123,44 @@ def health():
     return {"status": "okay"}
 
 
+@socketio.on("register")
+def register_user(message):
+    """ Handle creating a new user in the database. """
+
+    try:
+        user_name = message["user_name"]
+        email = message["email"]
+        password = message["password"]
+    except KeyError as error:
+        raise UnauthorizedError(
+            "A username, email, and password must be provided to register"
+        ) from error
+
+    user = create_user(database_session, user_name, email, password)
+    database_session.commit()
+
+    emit(
+        "registration_success",
+        {"user_id": user.id, "user_name": user.name, "email": user.email},
+    )
+
+
 @socketio.on("login")
 def socket_login(message):
     """ Process login even from a player. """
 
     LOGGER.info(f"Login requested: {message}")
     try:
-        player_name = message["name"]
+        email = message["email"]
+        password = message["password"]
     except KeyError as error:
-        raise UnauthorizedError("A username must be provided to log in") from error
+        raise UnauthorizedError(
+            "A username and password must be provided to log in"
+        ) from error
 
-    # TODO: Handle authentication
+    user = login_user(database_session, email, password)
+    database_session.commit()
 
-    # Give user a unique id to track which player they control
-    user = User(player_name)
-
-    user.store(user.id)
     # Push user into the proxy object for later reference
     current_user.push(user)
 
@@ -151,8 +172,6 @@ def socket_login(message):
 @login_required
 def load_player(message):  # pylint: disable=unused-argument
     """ Load a player into the world. """
-
-    # TODO: Handle authentication
 
     LOGGER.info(f"Loading player for {current_user}")
 
@@ -189,15 +208,6 @@ def logout(message):
     player.store(player.uuid)
 
 
-@socketio.on("check_in")
-@login_required
-def check_in(message):  # pylint: disable=unused-argument
-    """ Update last seen time for a player. """
-
-    current_user.ping()
-    LOGGER.debug(f"{current_user.last_seen}: {current_user.name} checked in")
-
-
 @socketio.on("connect")
 def on_connect():
     """ Handle new socket connections. """
@@ -227,10 +237,19 @@ def on_disconnect():
 def monitor_players():
     """ Watch for players who haven't pinged the server in a while and log them out. """
     with app.app_context():
+        db_session = DatabaseSession()
         while True:
             for user_id in list(PLAYERS.keys()):
-                user = User.retrieve(user_id)
-                if time.time() - user.last_seen > INACTIVE_TIMEOUT:
+                user = get_user(db_session, user_id)
+                deadline = datetime.today() - timedelta(seconds=INACTIVE_TIMEOUT)
+                inactive = user.last_seen < deadline
+                LOGGER.debug(
+                    f"Checking {user} for inactivity: "
+                    f"{user.last_seen.strftime('%H:%M:%S')} "
+                    f"< {deadline.strftime('%H:%M:%S')} "
+                    f"== {inactive}"
+                )
+                if inactive:
                     player = PLAYERS.pop(user_id)
 
                     LOGGER.info(f"Logging out {player} due to inactivity")
