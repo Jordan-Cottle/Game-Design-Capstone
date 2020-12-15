@@ -8,6 +8,7 @@ from sqlalchemy.orm import relationship
 from data import TileType
 
 from models import Base
+from world import Coordinate
 
 
 class Sector(Base):
@@ -46,6 +47,10 @@ class Location(Base):
     ships = relationship("Ship", cascade="all, delete-orphan")
     resource_nodes = relationship("ResourceNode", cascade="all, delete-orphan")
 
+    def __init__(self, sector_id, coordinate: Coordinate):
+        self.sector_id = sector_id
+        self.position = coordinate.json
+
     def __str__(self) -> str:
         return f"{self.position}"
 
@@ -56,6 +61,11 @@ class Location(Base):
             f"position='{self.position}', "
             f"sector_id={self.sector_id})"
         )
+
+    @property
+    def coordinate(self):
+        """ Get coordinate instance from this model. """
+        return Coordinate.load(self.position)
 
 
 class Tile(Base):
