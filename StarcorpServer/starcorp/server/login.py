@@ -127,6 +127,7 @@ def health():
 def register_user(message):
     """ Handle creating a new user in the database. """
 
+    LOGGER.debug(f"Attempting to create user from {message}")
     try:
         user_name = message["user_name"]
         email = message["email"]
@@ -138,6 +139,8 @@ def register_user(message):
 
     user = create_user(database_session, user_name, email, password)
     database_session.commit()
+
+    LOGGER.info(f"New user registered: {user.email} as {user.name}")
 
     emit(
         "registration_success",
@@ -234,8 +237,8 @@ def on_disconnect():
             LOGGER.debug(f"{current_user}'s player already removed from world")
         current_user.pop()
 
-    db_session = database_session.pop()
-    db_session.close()
+    database_session.close()
+    database_session.pop()
 
 
 def monitor_players():
