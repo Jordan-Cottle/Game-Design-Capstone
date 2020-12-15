@@ -2,6 +2,7 @@
 
 from sqlalchemy import Column, Integer, String, Enum, ForeignKey, Float, Boolean
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql.schema import UniqueConstraint
 
 from data import ShipSystemAttributeType
 from models import Base
@@ -30,22 +31,22 @@ class ShipSystemAttribute(Base):
     __tablename__ = "ShipSystemAttribute"
     id = Column(Integer, primary_key=True)
 
-    type = Column(
-        Enum(ShipSystemAttributeType), unique=True, nullable=False, index=True
-    )
+    __tableargs__ = (UniqueConstraint("type", "system_id"),)
+
+    type = Column(Enum(ShipSystemAttributeType), nullable=False, index=True)
     value = Column(Float, nullable=False)
 
     system_id = Column(Integer, ForeignKey("ShipSystem.id"), nullable=False)
     system = relationship("ShipSystem")
 
     def __str__(self) -> str:
-        return f"{self.system} {self.type} == {self.value}"
+        return f"{self.system} {self.type} is {self.value}"
 
     def __repr__(self) -> str:
         return (
             f"ShipSystemAttribute("
             f"id={self.id}, "
-            f"type={self.type}, "
+            f"type='{self.type}', "
             f"value={self.value}, "
             f"system_id={self.system_id})"
         )

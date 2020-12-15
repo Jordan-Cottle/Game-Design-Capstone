@@ -31,7 +31,7 @@ class ShipSystemAttributeType(str, Enum):
     HARD_POINT_COST = "hard_point_cost"
     MODULE_COST = "module_cost"
     COMPONENT_COST = "component_cost"
-    BASE_PRICE = "base_price"
+    BASE_COST = "base_cost"
 
     SPEED = "speed"
     POWER = "power"
