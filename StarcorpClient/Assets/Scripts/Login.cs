@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 using System.Text.RegularExpressions;
 
@@ -39,9 +40,61 @@ public class Login : MonoBehaviour
 
         Debug.Log($"Logging in with: {email}, {password}");
 
-        this.statusLabel.text = "Logging in...";
-        this.statusLabel.color = Color.green;
-        this.socket.Login(email, password);
+        this.SetMessage("Logging in...", Color.green);
+        this.login(email, password);
+    }
+
+    private void login(string email, string password)
+    {
+        Debug.Log("Logging in");
+
+        this.socket.Register("login_accepted", (ev) =>
+        {
+            var data = ev.Data[0];
+
+            this.socket.userID = (string)data["id"];
+
+            Debug.Log($"Logged in successfully with ID: {this.socket.userID}");
+
+            this.socket.ready = true;
+            this.socket.UnRegister("login_accepted");
+            this.socket.UnRegister("login_failed");
+
+            this.socket.Register("player_logout", (eve) =>
+            {
+                Debug.Log("Checking for client being logged out due to inactivity");
+                string userID = (string)eve.Data[0]
+            ["user_id"];
+
+                Debug.Log($"This: {this.socket.userID}, Other: {userID}");
+                if (userID == this.socket.userID)
+                {
+                    Debug.Log("Client inactive, shutting down socket.");
+                    this.socket.Close();
+
+                    SceneManager.LoadScene("MainMenu");
+                }
+            });
+
+            SceneManager.LoadScene("MainScene");
+        });
+
+        this.socket.Register("login_failed", (ev) =>
+        {
+            var data = ev.Data[0];
+
+            string reason = (string)data["reason"];
+            string error_id = (string)data["id"];
+
+            Debug.Log($"Problem encountered with logging in: {reason}, {error_id}");
+
+            this.SetMessage(reason, Color.red);
+
+            this.socket.UnRegister("login_accepted");
+            this.socket.UnRegister("login_failed");
+        });
+
+        this.socket.Emit("login", JObject.Parse($"{{'email': '{email}', 'password': '{password}'}}"));
     }
 
     public void Registration()
@@ -67,22 +120,19 @@ public class Login : MonoBehaviour
 
         if (password != rePassword)
         {
-            this.statusLabel.gameObject.SetActive(true);
-            this.statusLabel.text = "Both password fields must match!";
+            this.SetMessage("Both password fields must match!", Color.red);
             return;
         }
 
         if (username.Length < 3)
         {
-            this.statusLabel.gameObject.SetActive(true);
-            this.statusLabel.text = "Username must be at least 4 characters long!";
+            this.SetMessage("Username must be at least 4 characters long!", Color.red);
             return;
         }
 
         if (password.Length < 5)
         {
-            this.statusLabel.gameObject.SetActive(true);
-            this.statusLabel.text = "Password must be at least 6 characters long!";
+            this.SetMessage("Password must be at least 6 characters long!", Color.red);
             return;
         }
 
@@ -91,14 +141,14 @@ public class Login : MonoBehaviour
             this.statusLabel.gameObject.SetActive(true);
             if (!this.checkEmailReminder)
             {
-                this.statusLabel.text = "Please double check that your email is valid!";
+                this.SetMessage("Please double check that your email is valid!", Color.red);
                 this.checkEmailReminder = true;
                 this.emailChecked = email;
                 return;
             }
             if (this.emailChecked != email)
             {
-                this.statusLabel.text = "Please double check that your email is valid!";
+                this.SetMessage("Please double check that your email is valid!", Color.red);
                 this.emailChecked = email;
                 return;
             }
@@ -115,13 +165,32 @@ public class Login : MonoBehaviour
             this.usernameInput.gameObject.SetActive(false);
             this.rePasswordInput.gameObject.SetActive(false);
             this.passwordInput.text = "";
-            this.statusLabel.text = "Registration successful, please log in now";
-            this.statusLabel.color = Color.green;
+            this.SetMessage("Registration successful, please log in now", Color.green);
+        });
 
+        this.socket.Register("registration_failed", (ev) =>
+        {
+            var data = ev.Data[0];
+
+            string reason = (string)data["reason"];
+            string error_id = (string)data["id"];
+
+            Debug.Log($"Registration unsuccessful: {reason}, {error_id}");
+
+            this.socket.UnRegister("registration_failed");
+
+            this.SetMessage(reason, Color.red);
         });
 
 
         this.socket.Emit("register", JObject.Parse($"{{'user_name': '{username}', 'email': '{email}', 'password': '{password}'}}"));
+    }
+
+    private void SetMessage(string message, Color color)
+    {
+        this.statusLabel.gameObject.SetActive(true);
+        this.statusLabel.text = message;
+        this.statusLabel.color = color;
     }
 
 

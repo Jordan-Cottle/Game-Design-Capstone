@@ -14,7 +14,7 @@ public class Socket : MonoBehaviour
     private const string SOCKET_URL = "ws://lanparty.mynetgear.com:1234/socket.io/?EIO=4&transport=websocket";
 
     private SocketIO _socket;
-    private string userID;
+    public string userID;
     private Dictionary<string, string> cookies;
 
     private Dictionary<string, Action<SocketIOEvent>> handlers;
@@ -52,45 +52,6 @@ public class Socket : MonoBehaviour
     public void Awake()
     {
         DontDestroyOnLoad(this.gameObject);
-    }
-
-    public void Login(string email, string password)
-    {
-        Debug.Log("Logging in");
-
-        this.Register("login_accepted", (ev) =>
-        {
-            var data = ev.Data[0];
-
-            this.userID = (string)data["id"];
-
-            this.AddCookie("id", this.userID);
-
-            Debug.Log($"Logged in successfully with ID: {this.userID}");
-
-            this.ready = true;
-            this.UnRegister("login_accepted", this.handlers["login_accepted"]);
-
-            this.Register("player_logout", (eve) =>
-            {
-                Debug.Log("Checking for client being logged out due to inactivity");
-                string userID = (string)eve.Data[0]
-            ["user_id"];
-
-                Debug.Log($"This: {this.userID}, Other: {userID}");
-                if (userID == this.userID)
-                {
-                    Debug.Log("Client inactive, shutting down socket.");
-                    this.Close();
-
-                    SceneManager.LoadScene("MainMenu");
-                }
-            });
-
-            SceneManager.LoadScene("MainScene");
-        });
-
-        this.Emit("login", JObject.Parse($"{{'email': '{email}', 'password': '{password}'}}"));
     }
 
     private void AddCookie(string key, string value)
