@@ -1,5 +1,6 @@
 """ Module for all events related to log in/out. """
 import json
+import uuid
 from datetime import datetime, timedelta
 from functools import wraps
 from http import HTTPStatus
@@ -8,22 +9,24 @@ import eventlet
 from database import DatabaseSession, create_user, get_user, login_user
 from flask import request, session
 from flask_socketio import disconnect, emit
+from database.user import LoginError
 from global_context import PLAYERS
 from objects import Player
 from utils import get_logger
 from world import Coordinate
 
-from server import HttpError, app, socketio
+from server import app, socketio
+from exceptions import SocketIOEventError
 
 LOGGER = get_logger(__name__)
 
 INACTIVE_TIMEOUT = 30
 
 
-class UnauthorizedError(HttpError):
+class UnauthorizedError(SocketIOEventError):
     """ Error for when an unauthorized access is attempted. """
 
-    response_code = HTTPStatus.UNAUTHORIZED
+    event = "unauthorized"
 
 
 class ProxyAccessError(Exception):
@@ -85,19 +88,6 @@ class SessionProxy:
 
 current_user = SessionProxy("user")
 database_session = SessionProxy("database session")
-
-
-@socketio.on_error()  # Handles the default namespace
-def error_handler(error):
-    """ Handle errors in socketio event handlers. """
-
-    if isinstance(error, UnauthorizedError):
-        LOGGER.exception(f"Unauthorized request detected during {request.event}")
-        disconnect()
-    else:
-        LOGGER.exception(f"An unexpected {error!r} has ocurred during {request.event}!")
-        disconnect()
-        raise error
 
 
 def login_required(func):

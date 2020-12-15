@@ -7,9 +7,19 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from models import User
 
+from exceptions import SocketIOEventError
 
-class LoginError(Exception):
+
+class LoginError(SocketIOEventError):
     """ Thrown when an issue preventing a successful login occurs. """
+
+    event = "login_failed"
+
+
+class RegistrationError(SocketIOEventError):
+    """ thrown when an issue preventing registration occurs. """
+
+    event = "registration_failed"
 
 
 def get_user(session, user_id):
@@ -28,6 +38,9 @@ def create_user(session, name, email, password):
     salt = os.urandom(32)
     hashed = sha256(salt + password.encode()).digest()
 
+    if session.query(User).filter_by(email=email).first() is not None:
+        raise RegistrationError(f"{email} email address is already in use")
+
     user = User(name=name, email=email, password=hashed.hex(), salt=salt.hex())
 
     session.add(user)
@@ -45,7 +58,7 @@ def login_user(session, email, password):
     hash = sha256(bytes.fromhex(user.salt) + password.encode()).digest()
 
     if hash != bytes.fromhex(user.password):
-        raise LoginError(f"{password} was incorrect for {user}")
+        raise LoginError(f"Password was incorrect for {email}")
 
     user.ping()
     session.commit()
