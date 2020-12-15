@@ -1,9 +1,7 @@
 """ Module for containing a base http error and handler for returning exceptions from views. """
 from uuid import uuid4
-from flask import make_response, request
-from flask_socketio import emit, disconnect
+from flask import make_response
 
-from server import app, socketio
 from utils import get_logger
 
 LOGGER = get_logger(__name__)
@@ -64,26 +62,3 @@ class SocketIOEventError(Exception):
 
     def __repr__(self) -> str:
         return f"{self.type}(message={self.message}, event={self.event})<id={self.id}>"
-
-
-@app.errorhandler(HttpError)
-def handle_http_error(error):
-    """ Translate the unhandled error into an appropriate api response. """
-    return error.response
-
-
-@socketio.on_error()
-def handle_error(error):
-    """ Handle generic SocketIOEventError. """
-
-    if isinstance(error, SocketIOEventError):
-        LOGGER.warning(f"Error encountered during {request.event}: {error!r}")
-        emit(error.event, error.response)
-    else:
-        error_id = uuid4()
-        LOGGER.exception(
-            f"An unexpected {error!r} has ocurred during {request.event}. Error id: {error_id}!"
-        )
-        emit("error", {"reason": "An unexpected error ocurred", "id": str(error_id)})
-        disconnect()
-        raise error
