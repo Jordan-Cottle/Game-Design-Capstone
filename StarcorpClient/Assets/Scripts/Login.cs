@@ -26,7 +26,12 @@ public class Login : MonoBehaviour
 
     private bool registrationShown;
     // Start is called before the first frame update
-    public Socket socket;
+    private Socket socket;
+
+    void Start()
+    {
+        this.socket = FindObjectOfType<Socket>();
+    }
     public void LoginUser()
     {
         string email = this.emailInput.text;
@@ -117,7 +122,6 @@ public class Login : MonoBehaviour
 
 
         this.socket.Emit("register", JObject.Parse($"{{'user_name': '{username}', 'email': '{email}', 'password': '{password}'}}"));
-
     }
 
 
