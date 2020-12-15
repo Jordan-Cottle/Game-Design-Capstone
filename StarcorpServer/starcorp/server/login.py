@@ -92,10 +92,10 @@ def error_handler(error):
     """ Handle errors in socketio event handlers. """
 
     if isinstance(error, UnauthorizedError):
-        LOGGER.exception(f"Unauthorized request detected during {request}")
+        LOGGER.exception(f"Unauthorized request detected during {request.event}")
         disconnect()
     else:
-        LOGGER.exception(f"An unexpected {error!r} has ocurred during {request}!")
+        LOGGER.exception(f"An unexpected {error!r} has ocurred during {request.event}!")
         disconnect()
         raise error
 
@@ -109,6 +109,7 @@ def login_required(func):
     @wraps(func)
     def check_log_in(*args, **kwargs):
         current_user.ping()
+        database_session.commit()
 
         return func(*args, **kwargs)
 
@@ -162,7 +163,6 @@ def socket_login(message):
         ) from error
 
     user = login_user(database_session, email, password)
-    database_session.commit()
 
     # Push user into the proxy object for later reference
     current_user.push(user)

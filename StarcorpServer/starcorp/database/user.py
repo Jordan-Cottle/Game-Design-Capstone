@@ -48,4 +48,5 @@ def login_user(session, email, password):
         raise LoginError(f"{password} was incorrect for {user}")
 
     user.ping()
+    session.commit()
     return user
