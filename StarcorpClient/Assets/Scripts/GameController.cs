@@ -35,7 +35,7 @@ public class GameController : MonoBehaviour
     {
         this.mainCamera = Camera.main;
 
-        this.socket = GetComponent<Socket>();
+        this.socket = FindObjectOfType<Socket>();
         this.objectManager = GetComponent<ObjectManager>();
         this.gameGrid = FindObjectOfType<HexGrid>();
 
@@ -68,7 +68,7 @@ public class GameController : MonoBehaviour
             Destroy(this.objectManager.Get(uuid));
         });
 
-        this.socket.Login($"UnityTest{Random.value}", "12345");
+        this.socket.Emit("player_load");
     }
 
     IEnumerator MovePlayerTo(Vector3 screenPosition)

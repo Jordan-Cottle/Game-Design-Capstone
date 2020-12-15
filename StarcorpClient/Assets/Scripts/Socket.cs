@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 
 using Dpoch.SocketIO;
 using Newtonsoft.Json.Linq;
@@ -67,8 +68,6 @@ public class Socket : MonoBehaviour
 
             Debug.Log($"Logged in successfully with ID: {this.userID}");
 
-            this.Emit("player_load");
-
             this.ready = true;
             this.UnRegister("login_accepted", this.handlers["login_accepted"]);
 
@@ -83,8 +82,12 @@ public class Socket : MonoBehaviour
                 {
                     Debug.Log("Client inactive, shutting down socket.");
                     this.Close();
+
+                    SceneManager.LoadScene("MainMenu");
                 }
             });
+
+            SceneManager.LoadScene("MainScene");
         });
 
         this.Emit("login", JObject.Parse($"{{'email': '{email}', 'password': '{password}'}}"));
