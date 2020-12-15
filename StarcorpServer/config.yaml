@@ -17,3 +17,6 @@ logging:
 database:
   engine:
     url: sqlite:///starcorp.db
+game:
+  cities:
+    starting_population: 100

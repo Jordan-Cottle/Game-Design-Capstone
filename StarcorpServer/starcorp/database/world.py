@@ -3,7 +3,13 @@
 from sqlalchemy.orm.exc import NoResultFound
 
 from database import get_by_name_or_id
-from models import Sector, Location
+from models import Sector, Location, City
+from data import CONFIG
+
+
+CITY_START_POP = CONFIG.get("game.cities.starting_population")
+
+
 def get_sector(session, sector_name=None, sector_id=None):
     """ Get a sector by it's name or id. """
 
@@ -34,3 +40,19 @@ def get_location(session, sector, coordinate):
         session.flush()
 
     return location
+
+
+def get_city(session, city_id=None, city_name=None):
+    """ Get a city by it's name or id. """
+
+    return get_by_name_or_id(session, City, model_id=city_id, name=city_name)
+
+
+def create_city(session, name, location):
+    """ Create a new city with the given name and location. """
+
+    city = City(name=name, location_id=location.id, population=CITY_START_POP)
+
+    session.add(city)
+
+    return city
