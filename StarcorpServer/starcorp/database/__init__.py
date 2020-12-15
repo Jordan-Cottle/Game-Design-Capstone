@@ -25,4 +25,4 @@ def get_by_name_or_id(session, model, *, model_id=None, name=None):
 
 
 from .user import create_user, login_user, get_user
-from .world import get_sector
+from .world import get_sector, get_location
