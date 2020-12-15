@@ -44,6 +44,7 @@ public class Socket : MonoBehaviour
         this.cookies = new Dictionary<string, string>();
         this.handlers = new Dictionary<string, Action<SocketIOEvent>>();
 
+        socket.Connect();
         return socket;
     }
 
@@ -85,8 +86,6 @@ public class Socket : MonoBehaviour
                 }
             });
         });
-
-        this.socket.Connect();
 
         this.Emit("login", JObject.Parse($"{{'email': '{email}', 'password': '{password}'}}"));
     }
@@ -154,8 +153,12 @@ public class Socket : MonoBehaviour
         this.handlers[ev] = handler;
     }
 
-    public void UnRegister(string ev, Action<SocketIOEvent> handler)
+    public void UnRegister(string ev, Action<SocketIOEvent> handler = null)
     {
+        if (handler is null)
+        {
+            handler = this.handlers[ev];
+        }
         this.socket.Off(ev, handler);
         this.handlers.Remove(ev);
     }
