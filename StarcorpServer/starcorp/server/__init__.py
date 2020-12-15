@@ -49,9 +49,6 @@ LOGGER.addHandler(handler)
 socketio.init_app(app, json=flask.json, logger=LOGGER)
 
 
-# Core imports
-from .exceptions import *
-
 # Set up events
 from .login import *
 from .player_input import *
