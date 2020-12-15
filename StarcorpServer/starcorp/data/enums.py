@@ -28,15 +28,14 @@ class Resource(str, Enum):
 class ShipSystemAttributeType(str, Enum):
     """ Enumeration of all possible ship system attributes. """
 
-    HARD_POINT_COST = "hard point cost"
-    MODULE_COST = "module cost"
-    COMPONENT_COST = "component cost"
-    BASE_PRICE = "base price"
+    HARD_POINT_COST = "hard_point_cost"
+    MODULE_COST = "module_cost"
+    COMPONENT_COST = "component_cost"
+    BASE_PRICE = "base_price"
 
-    MIN_POWER_DRAW = "minimum power draw"
-    MAX_POWER_DRAW = "maximum power draw"
-
-    POWER_EFFICIENCY = "power efficiency"
+    SPEED = "speed"
+    POWER = "power"
+    SIZE = "size"
 
 
 class UnitType(str, Enum):
