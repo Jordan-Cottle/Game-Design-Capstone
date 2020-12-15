@@ -61,8 +61,8 @@ class ShipChassis(Base):
     hull_points = Column(Integer, nullable=False)
 
     hard_points = Column(Integer, nullable=False)
-    modules = Column(Integer, nullable=False)
     components = Column(Integer, nullable=False)
+    modules = Column(Integer, nullable=False)
 
     base_cost = Column(Integer, nullable=False)
 
