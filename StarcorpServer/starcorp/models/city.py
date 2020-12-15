@@ -15,12 +15,12 @@ class City(Base):
     name = Column(String, unique=True, nullable=False)
     population = Column(Integer, nullable=False)
 
-    location_id = Column(Integer, ForeignKey("Location.id"), nullable=False, index=True)
+    location_id = Column(
+        Integer, ForeignKey("Location.id"), unique=True, nullable=False, index=True
+    )
     location = relationship("Location")
 
-    resources = relationship(
-        "CityResource", backref="city", cascade="all, delete-orphan"
-    )
+    resources = relationship("CityResource", cascade="all, delete-orphan")
 
     def __str__(self) -> str:
         return f"{self.name}"
@@ -30,7 +30,7 @@ class City(Base):
             "City("
             f"id={self.id}, "
             f"name='{self.name}', "
-            f"position={self.position}, "
+            f"location={self.location}, "
             f"population={self.population}, "
             f"location_id={self.location_id})"
         )
@@ -45,12 +45,12 @@ class CityResource(Base):
     amount = Column(Integer, nullable=False)
 
     city_id = Column(Integer, ForeignKey("City.id"), nullable=False, index=True)
+    city = relationship("City")
+
     resource_id = Column(
         Integer, ForeignKey("ResourceType.id"), nullable=False, index=True
     )
-
-    city = relationship("City")
-    resource = relationship("Resource")
+    resource = relationship("ResourceType")
 
     def __str__(self) -> str:
         return f"{self.city} has {self.amount} {self.resource}"

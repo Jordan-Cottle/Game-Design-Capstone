@@ -18,13 +18,6 @@ class Sector(Base):
 
     name = Column(String, unique=True, nullable=False)
 
-    ships = relationship("Ship", backref="sector", cascade="all, delete-orphan")
-    cities = relationship("City", backref="sector", cascade="all, delete-orphan")
-    tiles = relationship("Tile", backref="sector", cascade="all, delete-orphan")
-    resource_nodes = relationship(
-        "ResourceNode", backref="sector", cascade="all, delete-orphan"
-    )
-
     def __str__(self) -> str:
         return f"{self.name}"
 
@@ -43,9 +36,15 @@ class Location(Base):
     id = Column(Integer, primary_key=True)
 
     position = Column(String, nullable=False, index=True)
-    sector_id = Column(Integer, ForeignKey("Sector.id"), nullable=False, index=True)
 
-    sector = relationship("Sector")
+    sector_id = Column(Integer, ForeignKey("Sector.id"), nullable=False, index=True)
+    sector = relationship("Sector", uselist=False)
+
+    tile = relationship("Tile", cascade="all, delete-orphan", uselist=False)
+    city = relationship("City", cascade="all, delete-orphan", uselist=False)
+
+    ships = relationship("Ship", cascade="all, delete-orphan")
+    resource_nodes = relationship("ResourceNode", cascade="all, delete-orphan")
 
     def __str__(self) -> str:
         return f"{self.position}"
@@ -67,7 +66,9 @@ class Tile(Base):
 
     type = Column(Enum(TileType), nullable=False)
 
-    location_id = Column(Integer, ForeignKey("Location.id"), nullable=False, index=True)
+    location_id = Column(
+        Integer, ForeignKey("Location.id"), unique=True, nullable=False, index=True
+    )
     location = relationship("Location")
 
     def __str__(self) -> str:

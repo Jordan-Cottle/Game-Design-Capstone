@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 
 using Dpoch.SocketIO;
 using Newtonsoft.Json.Linq;
@@ -12,33 +13,48 @@ public class Socket : MonoBehaviour
     private const string API_URL = "http://lanparty.mynetgear.com:1234";
     private const string SOCKET_URL = "ws://lanparty.mynetgear.com:1234/socket.io/?EIO=4&transport=websocket";
 
-    private SocketIO socket;
+    private SocketIO _socket;
     private string userID;
     private Dictionary<string, string> cookies;
 
+    private Dictionary<string, Action<SocketIOEvent>> handlers;
+
     public bool ready = false;
 
-    public void Awake()
+    public SocketIO socket
     {
-        this.socket = new SocketIO(SOCKET_URL);
-        this.cookies = new Dictionary<string, string>();
-
-        this.socket.OnOpen += () => Debug.Log("Socket open!");
-        this.socket.OnConnectFailed += () => Debug.Log("Socket failed to connect!");
-        this.socket.OnClose += () => Debug.Log("Socket closed!");
-        this.socket.OnError += (err) => Debug.Log("Socket Error: " + err);
-    }
-
-    IEnumerator KeepAlive() // TODO: Remove this when proper auto logout event from server is implemented
-    {
-        while (true)
+        get
         {
-            this.Emit("check_in");
-            yield return new WaitForSeconds(20);
+            if (this._socket is null)
+            {
+                this._socket = this.createSocket();
+            }
+
+            return this._socket;
         }
     }
 
-    public void Login(string playerName)
+    private SocketIO createSocket()
+    {
+        SocketIO socket = new SocketIO(SOCKET_URL);
+        socket.OnOpen += () => Debug.Log("Socket open!");
+        socket.OnConnectFailed += () => Debug.Log("Socket failed to connect!");
+        socket.OnClose += () => Debug.Log("Socket closed!");
+        socket.OnError += (err) => Debug.Log("Socket Error: " + err);
+
+        this.cookies = new Dictionary<string, string>();
+        this.handlers = new Dictionary<string, Action<SocketIOEvent>>();
+
+        socket.Connect();
+        return socket;
+    }
+
+    public void Awake()
+    {
+        DontDestroyOnLoad(this.gameObject);
+    }
+
+    public void Login(string email, string password)
     {
         Debug.Log("Logging in");
 
@@ -50,15 +66,31 @@ public class Socket : MonoBehaviour
 
             this.AddCookie("id", this.userID);
 
-            Debug.Log($"Logged in successfully with {this.userID}");
+            Debug.Log($"Logged in successfully with ID: {this.userID}");
 
-            this.Emit("player_load");
+            this.ready = true;
+            this.UnRegister("login_accepted", this.handlers["login_accepted"]);
 
-            StartCoroutine(this.KeepAlive());
+            this.Register("player_logout", (eve) =>
+            {
+                Debug.Log("Checking for client being logged out due to inactivity");
+                string userID = (string)eve.Data[0]
+            ["user_id"];
+
+                Debug.Log($"This: {this.userID}, Other: {userID}");
+                if (userID == this.userID)
+                {
+                    Debug.Log("Client inactive, shutting down socket.");
+                    this.Close();
+
+                    SceneManager.LoadScene("MainMenu");
+                }
+            });
+
+            SceneManager.LoadScene("MainScene");
         });
 
-        this.socket.Connect();
-        this.Emit("login", JObject.Parse($"{{'name': '{playerName}'}}"));
+        this.Emit("login", JObject.Parse($"{{'email': '{email}', 'password': '{password}'}}"));
     }
 
     private void AddCookie(string key, string value)
@@ -121,10 +153,24 @@ public class Socket : MonoBehaviour
     public void Register(string ev, Action<SocketIOEvent> handler)
     {
         this.socket.On(ev, handler);
+        this.handlers[ev] = handler;
+    }
+
+    public void UnRegister(string ev, Action<SocketIOEvent> handler = null)
+    {
+        if (handler is null)
+        {
+            handler = this.handlers[ev];
+        }
+        this.socket.Off(ev, handler);
+        this.handlers.Remove(ev);
     }
 
     public void Close()
     {
+        Debug.Log("Closing socket!");
         this.socket.Close();
+        this._socket = null;
+
     }
 }

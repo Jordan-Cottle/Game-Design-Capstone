@@ -15,9 +15,7 @@ class ShipSystem(Base):
 
     name = Column(String, unique=True, nullable=False)
 
-    attributes = relationship(
-        "ShipSystemAttribute", backref="system", cascade="all, delete-orphan"
-    )
+    attributes = relationship("ShipSystemAttribute", cascade="all, delete-orphan")
 
     def __str__(self) -> str:
         return f"{self.name}"
@@ -38,9 +36,7 @@ class ShipSystemAttribute(Base):
     value = Column(Float, nullable=False)
 
     system_id = Column(Integer, ForeignKey("ShipSystem.id"), nullable=False)
-    system = relationship(
-        "ShipSystem", backref="attributes", cascade="all, delete-orphan"
-    )
+    system = relationship("ShipSystem")
 
     def __str__(self) -> str:
         return f"{self.system} {self.type} == {self.value}"
@@ -95,20 +91,18 @@ class Ship(Base):
     active = Column(Boolean)
 
     location_id = Column(Integer, ForeignKey("Location.id"), nullable=False, index=True)
+    location = relationship("Location")
+
     owner_id = Column(Integer, ForeignKey("User.id"), nullable=False, index=True)
+    owner = relationship("User")
+
     chassis_id = Column(
         Integer, ForeignKey("ShipChassis.id"), nullable=False, index=True
     )
+    chassis = relationship("ShipChassis")
 
-    location = relationship("Location", backref="ships")
-    owner = relationship("User", backref="ship")
-    chassis = relationship("ShipChassis", backref="ships")
-    loadout = relationship(
-        "ShipInstalledSystem", backref="ship", cascade="all, delete-orphan"
-    )
-    inventory = relationship(
-        "ShipInventory", backref="ship", cascade="all, delete-orphan"
-    )
+    loadout = relationship("ShipInstalledSystem", cascade="all, delete-orphan")
+    inventory = relationship("ShipInventory", cascade="all, delete-orphan")
 
     def __str__(self) -> str:
         return f"{self.owner.name}'s {self.chassis} ship at {self.location}"
@@ -131,15 +125,13 @@ class ShipInstalledSystem(Base):
     id = Column(Integer, primary_key=True)
 
     ship_id = Column(Integer, ForeignKey("Ship.id"), nullable=False, index=True)
-    system_id = Column(Integer, ForeignKey("ShipSystem.id"), nullable=False)
+    ship = relationship("Ship")
 
-    ship = relationship("Ship", backref="loadout", cascade="all, delete-orphan")
-    system = relationship(
-        "ShipSystem", backref="installations", cascade="all, delete-orphan"
-    )
+    system_id = Column(Integer, ForeignKey("ShipSystem.id"), nullable=False)
+    system = relationship("ShipSystem")
 
     def __str__(self) -> str:
-        return f"{self.system.name} installed on {self.ship}"
+        return f"{self.system} installed on {self.ship}"
 
     def __repr__(self) -> str:
         return (
@@ -159,9 +151,9 @@ class ShipInventory(Base):
     amount = Column(Integer)
 
     ship_id = Column(Integer, ForeignKey("Ship.id"), nullable=False, index=True)
-    resource_type_id = Column(Integer, ForeignKey("ResourceType.id"), nullable=False)
+    ship = relationship("Ship")
 
-    ship = relationship("Ship", backref="inventory", cascade="all, delete-orphan")
+    resource_type_id = Column(Integer, ForeignKey("ResourceType.id"), nullable=False)
     resource_type = relationship("ResourceType")
 
     def __str__(self) -> str:

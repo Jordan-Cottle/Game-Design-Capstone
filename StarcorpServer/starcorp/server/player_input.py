@@ -5,7 +5,7 @@ from flask_socketio import emit
 from global_context import RESOURCE_NODES
 from world.coordinates import Coordinate
 
-from server import login_required, socketio
+from server import login_required, socketio, current_user
 
 from objects import Player, City, ALL_RESOURCES
 from utils import get_logger
@@ -15,10 +15,10 @@ LOGGER = get_logger(__name__)
 
 @socketio.on("player_move")
 @login_required
-def move_player(user, message):
+def move_player(message):
     """ Handle request for player movement. """
 
-    player = Player.by_user(user)
+    player = Player.by_user(current_user)
 
     destination = Coordinate.load(message["destination"])
     LOGGER.debug(f"Processing player movement request to {destination}")
@@ -43,10 +43,10 @@ def move_player(user, message):
 
 @socketio.on("gather_resource")
 @login_required
-def gather_resource(user, message):
+def gather_resource(message):
     """ Process gather resource request from player. """
 
-    player = Player.by_user(user)
+    player = Player.by_user(current_user)
 
     target = Coordinate.load(message["target"])
     LOGGER.debug(f"{player} attempting to gather at {target}")
@@ -73,10 +73,10 @@ def gather_resource(user, message):
 
 @socketio.on("sell_resource")
 @login_required
-def sell_resource(user, message):
+def sell_resource(message):
     """ Process resource sell request from a player. """
 
-    player = Player.by_user(user)
+    player = Player.by_user(current_user)
 
     city = City.get(message["city_id"])
 
