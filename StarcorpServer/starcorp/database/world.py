@@ -45,6 +45,14 @@ def get_location(session, sector, coordinate):
     return location
 
 
+def get_tile(session, sector, coordinate):
+    """ Get the tile from the database. """
+
+    location = get_location(session, sector, coordinate)
+
+    return location.tile
+
+
 def get_objects_in_sector(session, model, sector):
     """ Get objects of a type in a sector. """
 
