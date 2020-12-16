@@ -67,11 +67,12 @@ def gather_resource(message):
     else:
         resource = RESOURCE_NODES[target]
 
-        amount = ship.gather_power
-        add_resources(database_session, resource, amount, ship)
+        now_held = add_resources(database_session, resource, ship.gather_power, ship)
         database_session.commit()
 
-        emit("resource_gathered", {"resource_type": resource.value, "amount": amount})
+        emit(
+            "resource_gathered", {"resource_type": resource.value, "now_held": now_held}
+        )
 
 
 @socketio.on("sell_resource")
