@@ -80,3 +80,23 @@ def create_city(session, name, location):
         session.add(city_resource)
 
     return city
+
+
+def sell_to_city(session, resource_type, amount, city):
+    """ Sell a number of resources to a city. """
+
+    city_resource = (
+        session.query(CityResource)
+        .filter_by(city_id=city.id, resource_id=resource_type.id)
+        .one()
+    )
+
+    # TODO: compute price of resource
+    price = resource_type.base_cost
+
+    profit = amount * price
+
+    city_resource.amount += amount
+    LOGGER.info(f"Sold {amount} {resource_type} to {city}")
+
+    return profit
