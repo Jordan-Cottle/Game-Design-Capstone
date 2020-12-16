@@ -3,12 +3,12 @@
 
 from flask_socketio import emit
 from global_context import RESOURCE_NODES
-from world.coordinates import Coordinate
 
-from server import login_required, socketio, current_user
-
-from objects import Player, City, ALL_RESOURCES
+from database import move_ship
+from objects import ALL_RESOURCES, City, Player
+from server import current_user, database_session, login_required, socketio
 from utils import get_logger
+from world import Coordinate
 
 LOGGER = get_logger(__name__)
 
@@ -18,7 +18,7 @@ LOGGER = get_logger(__name__)
 def move_player(message):
     """ Handle request for player movement. """
 
-    player = Player.by_user(current_user)
+    ship = current_user.ship
 
     destination = Coordinate.load(message["destination"])
     LOGGER.debug(f"Processing player movement request to {destination}")
@@ -26,17 +26,19 @@ def move_player(message):
     # TODO: Spend AP for movement
 
     try:
-        player.move_to(destination)
+        move_ship(database_session, ship, destination)
+        database_session.commit()
     except ValueError:
-        LOGGER.warning(f"{player} movement to {destination} denied!")
+        LOGGER.warning(f"{ship} movement to {destination} denied!")
         emit(
             "movement_denied",
-            {"message": f"Unable to move to {destination} from {player.position}"},
+            {"message": f"Unable to move to {destination} from {ship.location}"},
         )
     else:
+        LOGGER.debug(f"{ship} moved to {ship.location}")
         emit(
             "object_moved",
-            player,
+            {"id": ship.id, "position": ship.location.coordinate},
             broadcast=True,
         )
 
