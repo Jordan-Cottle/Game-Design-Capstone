@@ -5,16 +5,18 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from data import CONFIG, ShipSystemAttributeType
 from data.json_util import TYPE_META
-from models import Sector, ShipChassis, ShipSystem, ShipSystemAttribute
+from models import ResourceType, Sector, ShipChassis, ShipSystem, ShipSystemAttribute
+
 from database import (
     DatabaseSession,
     create_city,
+    get_by_name_or_id,
     get_chassis,
+    get_cities,
     get_city,
     get_location,
     get_sector,
     get_ship_system,
-    get_cities,
 )
 from world.coordinates import Coordinate
 
@@ -85,16 +87,32 @@ def generate_config(empty=False):
 
         ship_system_data.append(data)
 
+    resource_data = []
+    for resource_type in session.query(ResourceType).all():
+        data = {"name": resource_type.name, "base_cost": resource_type.base_cost}
+        resource_data.append(data)
+
     print(
         yaml.dump(
             {
                 "Sector": sectors_data,
                 "ShipChassis": ship_chassis_data,
                 "ShipSystem": ship_system_data,
+                "Resources": resource_data,
             },
             sort_keys=False,
         )
     )
+
+
+def generate_resource(session, data):
+    """ Add resource types to the database. """
+
+    try:
+        resource_type = get_by_name_or_id(session, ResourceType, name=data["name"])
+    except NoResultFound:
+        resource_type = ResourceType(**data)
+        session.add(resource_type)
 
 
 def generate_sectors(session, sectors_data):
@@ -167,6 +185,9 @@ def push_config():
         config = yaml.safe_load(data_file.read())
 
     session = DatabaseSession()
+
+    for resource_data in config["Resources"]:
+        generate_resource(session, resource_data)
 
     generate_sectors(session, config["Sector"])
 

@@ -1,10 +1,8 @@
 """ Module for defining the resources model. """
 
-from sqlalchemy import Column, Integer, Enum
+from sqlalchemy import Column, Float, Integer, String
 
 from models import Base
-
-from data import Resource
 
 
 class ResourceType(Base):
@@ -13,7 +11,8 @@ class ResourceType(Base):
     __tablename__ = "ResourceType"
 
     id = Column(Integer, primary_key=True)
-    name = Column(Enum(Resource), unique=True, nullable=False, index=True)
+    name = Column(String, unique=True, nullable=False, index=True)
+    base_cost = Column(Float, nullable=False)
 
     def __str__(self) -> str:
         return f"{self.name}"
