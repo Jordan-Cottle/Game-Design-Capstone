@@ -4,7 +4,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from database import get_by_name_or_id
 from data import CONFIG
-from models import Sector, Location, City
+from models import Sector, Location, City, CityResource, ResourceType
 from utils import get_logger
 
 LOGGER = get_logger(__name__)
@@ -71,5 +71,12 @@ def create_city(session, name, location):
     city = City(name=name, location_id=location.id, population=CITY_START_POP)
 
     session.add(city)
+
+    for resource_type in session.query(ResourceType).all():
+        city_resource = CityResource(amount=0)
+        city_resource.city = city
+        city_resource.resource = resource_type
+
+        session.add(city_resource)
 
     return city
