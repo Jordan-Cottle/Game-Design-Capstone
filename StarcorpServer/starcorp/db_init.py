@@ -16,13 +16,13 @@ def main():
     LOGGER.info("Creating/validating models")
     Base.metadata.create_all(ENGINE)
 
-    push_config()
-
     with DatabaseSession() as session:
         for resource_type in Resource:
             resource = ResourceType(name=resource_type)
 
             session.add(resource)
+
+    push_config()
 
 
 if __name__ == "__main__":
