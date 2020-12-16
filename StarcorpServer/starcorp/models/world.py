@@ -78,13 +78,13 @@ class Tile(Base):
     location = relationship("Location")
 
     def __str__(self) -> str:
-        return f"{self.type} tile at {self.location}"
+        return f"{self.type.name} tile at {self.location}"
 
     def __repr__(self) -> str:
         return (
             "Tile("
             f"id={self.id}, "
-            f"type={self.type}, "
+            f"type={self.type.name}, "
             f"location_id={self.location_id})"
         )
 

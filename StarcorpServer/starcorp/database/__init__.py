@@ -28,6 +28,7 @@ from .user import create_user, login_user, get_user
 from .world import (
     get_sector,
     get_location,
+    get_tile,
     get_city,
     get_cities,
     create_city,
