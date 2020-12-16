@@ -26,4 +26,4 @@ def get_by_name_or_id(session, model, *, model_id=None, name=None):
 
 from .user import create_user, login_user, get_user
 from .world import get_sector, get_location, get_city, get_cities, create_city
-from .ship import get_chassis, get_ship_system, create_ship, move_ship
+from .ship import get_chassis, get_ship_system, create_ship, move_ship, add_resources

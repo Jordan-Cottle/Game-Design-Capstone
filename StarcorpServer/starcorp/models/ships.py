@@ -149,7 +149,7 @@ class ShipInventory(Base):
     __tablename__ = "ShipInventory"
 
     id = Column(Integer, primary_key=True)
-    amount = Column(Integer)
+    amount = Column(Integer, default=0, nullable=False)
 
     ship_id = Column(Integer, ForeignKey("Ship.id"), nullable=False, index=True)
     ship = relationship("Ship")
