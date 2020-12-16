@@ -5,7 +5,7 @@ from flask_socketio import emit
 from global_context import RESOURCE_NODES
 
 from database import move_ship, add_resources
-from objects import ALL_RESOURCES, City, Player
+from objects import City, Resource
 from server import current_user, database_session, login_required, socketio
 from utils import get_logger
 from world import Coordinate
@@ -80,22 +80,22 @@ def gather_resource(message):
 def sell_resource(message):
     """ Process resource sell request from a player. """
 
-    player = Player.by_user(current_user)
+    ship = current_user.ship
 
     city = City.get(message["city_id"])
 
-    LOGGER.debug(f"{player} attempting to sell to {city}")
+    LOGGER.debug(f"{ship} attempting to sell to {city}")
 
-    if player.position != city.position:
-        message = f"{player} unable to sell to {city}: Too far away"
+    if ship.location.coordinate != city.position:
+        message = f"{ship} unable to sell to {city}: Too far away"
         LOGGER.warning(message)
         emit(
             "gather_denied",
             {"message": message},
         )
     else:
-        for resource in ALL_RESOURCES:
-            player_held = player.held(resource)
+        for resource_slot in ship.inventory:
+            player_held = resource_slot.amount
             if 0 < player_held <= 5:
                 volume = player_held
             elif player_held <= 0:
@@ -103,11 +103,21 @@ def sell_resource(message):
             else:
                 volume = 5
 
-            LOGGER.info(f"{player} selling {volume} {resource} units to {city}")
+            resource_type = resource_slot.resource_type
 
-            player.resources[resource] -= volume
-            profit = city.sell(resource, volume)
-            player.money += profit
-            player.store(player.uuid)
+            LOGGER.info(f"{ship} selling {volume} {resource_type} units to {city}")
 
-        emit("resources_sold", {"player": player, "city": city})
+            resource_slot.amount -= volume
+            profit = city.sell(Resource.retrieve(resource_type.name.value), volume)
+            current_user.money += profit
+
+            database_session.commit()
+            emit(
+                "resources_sold",
+                {
+                    "new_balance": current_user.money,
+                    "resource_type": resource_type.name,
+                    "now_held": resource_slot.amount,
+                    "city": city,
+                },
+            )
