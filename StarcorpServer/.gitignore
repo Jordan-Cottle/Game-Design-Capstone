@@ -9,5 +9,6 @@ data/
 !starcorp/data
 
 *.log
+*.log.*
 
 *.db
