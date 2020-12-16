@@ -42,6 +42,14 @@ def get_location(session, sector, coordinate):
     return location
 
 
+def get_objects_in_sector(session, model, sector):
+    """ Get objects of a type in a sector. """
+
+    locations = session.query(Location).filter_by(sector_id=sector.id).subquery()
+
+    return session.query(model).join(locations).all()
+
+
 def get_city(session, city_id=None, city_name=None):
     """ Get a city by it's name or id. """
 
@@ -51,9 +59,7 @@ def get_city(session, city_id=None, city_name=None):
 def get_cities(session, sector):
     """ Get cities based on the sector they are in. """
 
-    locations = session.query(Location).filter_by(sector_id=sector.id).subquery()
-
-    return session.query(City).join(locations).all()
+    return get_objects_in_sector(session, City, sector)
 
 
 def create_city(session, name, location):
