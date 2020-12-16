@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, Float
 from sqlalchemy.orm import relationship
 
 from utils import get_logger
@@ -23,6 +23,8 @@ class User(Base):
     password = Column(String, nullable=False)
 
     last_seen = Column(DateTime, default=datetime.today, nullable=False)
+
+    money = Column(Float, default=100, nullable=False)
 
     ship = relationship("Ship", cascade="all, delete-orphan", uselist=False)
 
