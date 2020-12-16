@@ -320,6 +320,10 @@ PrefabInstance:
       propertyPath: pos
       value: '"0,2,-2"'
       objectReference: {fileID: 0}
+    - target: {fileID: -1829305050112340820, guid: 20f5d27167d5e344a87eea75ed5ccb50, type: 3}
+      propertyPath: type
+      value: water
+      objectReference: {fileID: 0}
     - target: {fileID: 743236385693683606, guid: 20f5d27167d5e344a87eea75ed5ccb50, type: 3}
       propertyPath: m_Name
       value: Water
@@ -2732,6 +2736,10 @@ PrefabInstance:
       propertyPath: pos
       value: '"-3,0,3"'
       objectReference: {fileID: 0}
+    - target: {fileID: -5931167349289327118, guid: abac9982a3090a543a3792ebf2f95618, type: 3}
+      propertyPath: type
+      value: fuel
+      objectReference: {fileID: 0}
     - target: {fileID: 793137039196190005, guid: abac9982a3090a543a3792ebf2f95618, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.75
@@ -3111,6 +3119,10 @@ PrefabInstance:
       propertyPath: pos
       value: '"-1,0,1"'
       objectReference: {fileID: 0}
+    - target: {fileID: 592769709909145766, guid: 83e12bbd919c9784599ce73182ecd0a0, type: 3}
+      propertyPath: type
+      value: food
+      objectReference: {fileID: 0}
     - target: {fileID: 5036871512300337507, guid: 83e12bbd919c9784599ce73182ecd0a0, type: 3}
       propertyPath: m_SortingOrder
       value: 1
@@ -3131,6 +3143,10 @@ PrefabInstance:
     - target: {fileID: -1829305050112340820, guid: 20f5d27167d5e344a87eea75ed5ccb50, type: 3}
       propertyPath: pos
       value: '"1,0,-1"'
+      objectReference: {fileID: 0}
+    - target: {fileID: -1829305050112340820, guid: 20f5d27167d5e344a87eea75ed5ccb50, type: 3}
+      propertyPath: type
+      value: water
       objectReference: {fileID: 0}
     - target: {fileID: 743236385693683606, guid: 20f5d27167d5e344a87eea75ed5ccb50, type: 3}
       propertyPath: m_Name

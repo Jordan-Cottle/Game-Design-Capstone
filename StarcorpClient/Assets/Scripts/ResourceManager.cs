@@ -21,9 +21,9 @@ public class ResourceManager : MonoBehaviour
         this.resourcesCounts = new Dictionary<string, int>();
 
         // TODO make this better
-        this.resourcesCounts["Water"] = 0;
-        this.resourcesCounts["Food"] = 0;
-        this.resourcesCounts["Fuel"] = 0;
+        this.resourcesCounts["water"] = 0;
+        this.resourcesCounts["food"] = 0;
+        this.resourcesCounts["fuel"] = 0;
 
         this.controller = GetComponent<GameController>();
     }
@@ -35,13 +35,13 @@ public class ResourceManager : MonoBehaviour
 
         this.socket.Register("resource_gathered", (ev) =>
         {
-            Debug.Log($"Resources gathered: {ev.Data[0]}");
-            JObject resources = (JObject)ev.Data[0]["resources"];
+            var data = ev.Data[0];
 
-            foreach (var resource in resources)
-            {
-                this.resourcesCounts[(string)resource.Key] = (int)resource.Value;
-            }
+            string resource_type = (string)data["resource_type"];
+            int amount = (int)data["amount"];
+            Debug.Log($"Gathered {amount} {resource_type}");
+
+            this.resourcesCounts[resource_type] += amount;
         });
 
         foreach (var resource in FindObjectsOfType<Resource>())
