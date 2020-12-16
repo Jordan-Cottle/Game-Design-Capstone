@@ -2,10 +2,9 @@
 
 
 from flask_socketio import emit
-from global_context import RESOURCE_NODES
 
-from database import move_ship, add_resources
-from objects import City, Resource
+from database import add_resources, get_city, move_ship, sell_to_city
+from global_context import RESOURCE_NODES
 from server import current_user, database_session, login_required, socketio
 from utils import get_logger
 from world import Coordinate
@@ -82,11 +81,11 @@ def sell_resource(message):
 
     ship = current_user.ship
 
-    city = City.get(message["city_id"])
+    city = get_city(database_session, message["city_id"])
 
     LOGGER.debug(f"{ship} attempting to sell to {city}")
 
-    if ship.location.coordinate != city.position:
+    if ship.location != city.location:
         message = f"{ship} unable to sell to {city}: Too far away"
         LOGGER.warning(message)
         emit(
@@ -108,7 +107,9 @@ def sell_resource(message):
             LOGGER.info(f"{ship} selling {volume} {resource_type} units to {city}")
 
             resource_slot.amount -= volume
-            profit = city.sell(Resource.retrieve(resource_type.name.value), volume)
+            profit, city_held = sell_to_city(
+                database_session, resource_type, volume, city
+            )
             current_user.money += profit
 
             database_session.commit()
@@ -118,6 +119,7 @@ def sell_resource(message):
                     "new_balance": current_user.money,
                     "resource_type": resource_type.name,
                     "now_held": resource_slot.amount,
-                    "city": city,
+                    "city_id": city.id,
+                    "city_held": city_held,
                 },
             )

@@ -99,4 +99,4 @@ def sell_to_city(session, resource_type, amount, city):
     city_resource.amount += amount
     LOGGER.info(f"Sold {amount} {resource_type} to {city}")
 
-    return profit
+    return profit, city_resource.amount
