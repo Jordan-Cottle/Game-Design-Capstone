@@ -1,7 +1,20 @@
 """ Module for ship related database utilities. """
 
+from sqlalchemy.orm.exc import NoResultFound
+
 from database import get_by_name_or_id, get_location
-from models import Ship, ShipChassis, ShipInstalledSystem, ShipSystem
+from models import (
+    ResourceType,
+    Ship,
+    ShipChassis,
+    ShipInstalledSystem,
+    ShipInventory,
+    ShipSystem,
+)
+from utils import get_logger
+
+
+LOGGER = get_logger(__name__)
 
 
 def get_chassis(session, chassis_id=None, name=None):
@@ -40,3 +53,28 @@ def move_ship(session, ship, coordinate):
         raise ValueError(f"{ship} too far away from {coordinate}")
 
     ship.location = get_location(session, ship.location.sector, coordinate)
+
+
+def add_resources(session, resource, amount, ship):
+    """ Add resources to a ship's inventory. """
+
+    resource_type = session.query(ResourceType).filter_by(name=resource).one()
+
+    # check for existing slot to place resources in
+    try:
+        inventory_slot = (
+            session.query(ShipInventory)
+            .filter_by(ship_id=ship.id, resource_type_id=resource_type.id)
+            .one()
+        )
+    except NoResultFound:
+        LOGGER.debug(f"No inventory slot on {ship} found for {resource}, adding one")
+        inventory_slot = ShipInventory()
+        inventory_slot.resource_type = resource_type
+        inventory_slot.ship = ship
+
+        session.add(inventory_slot)
+        session.commit()
+
+    LOGGER.debug(f"Adding {amount} {resource} to {ship}: {inventory_slot}")
+    inventory_slot.amount += amount
