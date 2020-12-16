@@ -6,13 +6,16 @@ using Newtonsoft.Json.Linq;
 
 public class ObjectManager : MonoBehaviour
 {
-    private Dictionary<string, GameObject> objects;
+    private Dictionary<string, Dictionary<string, GameObject>> objects;
 
     public PlayerController playerPrefab;
 
     public void Start()
     {
-        this.objects = new Dictionary<string, GameObject>();
+        this.objects = new Dictionary<string, Dictionary<string, GameObject>>();
+
+        this.objects["player"] = new Dictionary<string, GameObject>();
+        this.objects["city"] = new Dictionary<string, GameObject>();
     }
 
     public void SetUp(Socket socket)
@@ -26,7 +29,7 @@ public class ObjectManager : MonoBehaviour
             Position position = new Position((string)data["position"]);
 
             // TODO: Handle generically
-            PlayerController player = this.Get(id).GetComponent<PlayerController>();
+            PlayerController player = this.Get("player", id).GetComponent<PlayerController>();
             player.JumpTo(position);
         });
 
@@ -46,7 +49,7 @@ public class ObjectManager : MonoBehaviour
         PlayerController player = Instantiate(this.playerPrefab, Vector3.zero, Quaternion.identity);
         player.JumpTo(position);
 
-        this.Track(id, player.gameObject);
+        this.Track("player", id, player.gameObject);
 
         return player;
     }
@@ -56,13 +59,13 @@ public class ObjectManager : MonoBehaviour
         Debug.Log(data);
     }
 
-    public void Track(string uuid, GameObject obj)
+    public void Track(string type, string id, GameObject obj)
     {
-        this.objects[uuid] = obj;
+        this.objects[type][id] = obj;
     }
 
-    public GameObject Get(string uuid)
+    public GameObject Get(string type, string id)
     {
-        return this.objects[uuid];
+        return this.objects[type][id];
     }
 }
