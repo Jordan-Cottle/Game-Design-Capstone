@@ -3,8 +3,9 @@
 import yaml
 from sqlalchemy.orm.exc import NoResultFound
 
-from data import CONFIG, ShipSystemAttributeType
+from data import CONFIG, ShipSystemAttributeType, TileType
 from data.json_util import TYPE_META
+from data.map_gen import load
 from models import ResourceType, Sector, ShipChassis, ShipSystem, ShipSystemAttribute
 
 from database import (
@@ -17,7 +18,9 @@ from database import (
     get_location,
     get_sector,
     get_ship_system,
+    get_tile,
 )
+from models.world import Tile
 from world.coordinates import Coordinate
 
 
@@ -115,6 +118,36 @@ def generate_resource(session, data):
         session.add(resource_type)
 
 
+def load_map(session, map_file, sector):
+    """ Load a map of tiles into a sector. """
+
+    map_data = load(map_file)
+
+    rows = len(map_data)
+    cols = len(map_data[0])
+
+    r_start = -(rows // 2) + 1
+
+    for x, row in enumerate(map_data, r_start):  # rows
+
+        c_start = -(cols // 2) + 1
+        for y, tile_type in enumerate(row, c_start):
+            tile_type = TileType(tile_type)
+            z = -(x + y)
+
+            coordinate = Coordinate(x, y, z)
+
+            tile = get_tile(session, sector, coordinate)
+            if tile is None:
+                print(f"Tile at {coordinate} does not exist, creating it")
+                tile = Tile(type=tile_type)
+                tile.location = get_location(session, sector, coordinate)
+                session.add(tile)
+            elif tile.type != tile_type:
+                print(f"Updating {tile} to {tile_type.name}")
+                tile.type = tile_type
+
+
 def generate_sectors(session, sectors_data):
     """ Get or create sectors using static config data. """
     print(sectors_data)
@@ -139,6 +172,8 @@ def generate_sectors(session, sectors_data):
                 coordinate = Coordinate.load(city_data["location"])
                 location = get_location(session, sector, coordinate)
                 create_city(session, city_name, location)
+
+        load_map(session, f"data/maps/{sector.name}.map", sector)
 
 
 def generate_chassis(session, chassis_data):
