@@ -48,6 +48,14 @@ def get_city(session, city_id=None, city_name=None):
     return get_by_name_or_id(session, City, model_id=city_id, name=city_name)
 
 
+def get_cities(session, sector):
+    """ Get cities based on the sector they are in. """
+
+    locations = session.query(Location).filter_by(sector_id=sector.id).subquery()
+
+    return session.query(City).join(locations).all()
+
+
 def create_city(session, name, location):
     """ Create a new city with the given name and location. """
 
