@@ -21,12 +21,12 @@ public class ObjectManager : MonoBehaviour
         {
             var data = ev.Data[0];
 
-            string uuid = (string)data["uuid"];
+            string id = (string)data["id"];
 
             Position position = new Position((string)data["position"]);
 
             // TODO: Handle generically
-            PlayerController player = this.Get(uuid).GetComponent<PlayerController>();
+            PlayerController player = this.Get(id).GetComponent<PlayerController>();
             player.JumpTo(position);
         });
 
@@ -38,15 +38,15 @@ public class ObjectManager : MonoBehaviour
 
     public PlayerController CreatePlayer(JObject data)
     {
-        string uuid = (string)data["uuid"];
+        string id = (string)data["id"];
         Position position = new Position((string)data["position"]);
 
-        Debug.Log($"Setting up player with {position}");
+        Debug.Log($"Setting up player {id} with {position}");
 
         PlayerController player = Instantiate(this.playerPrefab, Vector3.zero, Quaternion.identity);
         player.JumpTo(position);
 
-        this.Track(uuid, player.gameObject);
+        this.Track(id, player.gameObject);
 
         return player;
     }
