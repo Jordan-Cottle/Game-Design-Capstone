@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 public class City : MonoBehaviour
 {
-    public string uuid;
+    public string id;
     public int population;
     public Dictionary<string, int> resources;
 
@@ -24,7 +24,7 @@ public class City : MonoBehaviour
         Debug.Log($"Initializing with {data}");
         Debug.Log($"Resources: {data[rss]}");
         this.name = (string)data["name"];
-        this.uuid = (string)data["uuid"];
+        this.id = (string)data["id"];
         this.population = (int)data["population"];
         foreach (var pair in (JObject)data["resources"])
         {

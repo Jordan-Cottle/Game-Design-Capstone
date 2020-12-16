@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -36,6 +36,8 @@ public class CityManager : MonoBehaviour
         socket.Register("load_city", (ev) =>
         {
             var data = ev.Data[0];
+
+            Debug.Log($"Loading city from {data}");
 
             City city = this.CreateCity((JObject)data);
 
@@ -76,7 +78,7 @@ public class CityManager : MonoBehaviour
 
         city.Initialize(data);
 
-        this.controller.ObjectManager.Track("city", (string)data["uuid"], city.gameObject);
+        this.controller.ObjectManager.Track("city", (string)data["id"], city.gameObject);
         this.cities.Add(position, city);
 
         return city;
@@ -99,7 +101,7 @@ public class CityManager : MonoBehaviour
                 city.OnClick();
 
                 JObject obj = new JObject();
-                obj["city_id"] = city.uuid;
+                obj["city_id"] = city.id;
                 Debug.Log($"Attempting to sell to {city}");
                 this.socket.Emit("sell_resource", obj);
             }
