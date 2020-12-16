@@ -5,18 +5,32 @@ from flask_socketio import emit
 from global_context import CITIES, RESOURCE_NODES
 from utils import get_logger
 from world.coordinates import Coordinate
-from server import login_required, socketio, current_user
+from server import login_required, socketio, current_user, database_session
+
+from database import get_cities
 
 LOGGER = get_logger(__name__)
 
 
 @socketio.on("get_cities")
 @login_required
-def get_cities(message):  # pylint: disable=unused-argument
+def send_cities(message):  # pylint: disable=unused-argument
     """ Trigger a 'load_city' event for each city in the game. """
     LOGGER.debug(f"City list requested by {current_user}")
-    for city in CITIES.values():
-        emit("load_city", city)
+    for city in get_cities(database_session, current_user.ship.location.sector):
+        resources = {}
+        for resource_held in city.resources:
+            resources[resource_held.resource.name] = resource_held.amount
+
+        response = {
+            "position": city.location.coordinate,
+            "id": city.id,
+            "name": city.name,
+            "resources": resources,
+            "population": city.population,
+        }
+        LOGGER.debug(f"Emitting {response} to {current_user}")
+        emit("load_city", response)
 
 
 @socketio.on("get_city_data")
