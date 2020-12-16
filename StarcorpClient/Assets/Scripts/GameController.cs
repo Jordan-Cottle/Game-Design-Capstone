@@ -65,7 +65,7 @@ public class GameController : MonoBehaviour
             Debug.Log("Processing logout event");
             string id = (string)ev.Data[0]["id"];
 
-            Destroy(this.objectManager.Get(id));
+            Destroy(this.objectManager.Get("player", id));
         });
 
         this.socket.Emit("player_load");

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -76,7 +76,7 @@ public class CityManager : MonoBehaviour
 
         city.Initialize(data);
 
-        this.controller.ObjectManager.Track((string)data["uuid"], city.gameObject);
+        this.controller.ObjectManager.Track("city", (string)data["uuid"], city.gameObject);
         this.cities.Add(position, city);
 
         return city;
