@@ -3,8 +3,11 @@
 from sqlalchemy.orm.exc import NoResultFound
 
 from database import get_by_name_or_id
-from models import Sector, Location, City
 from data import CONFIG
+from models import Sector, Location, City
+from utils import get_logger
+
+LOGGER = get_logger(__name__)
 
 
 CITY_START_POP = CONFIG.get("game.cities.starting_population")
@@ -31,11 +34,11 @@ def get_location(session, sector, coordinate):
     try:
         location = (
             session.query(Location)
-            .filter_by(id=sector_id, position=coordinate.json)
+            .filter_by(sector_id=sector_id, position=coordinate.json)
             .one()
         )
     except NoResultFound:
-        location = Location(sector_id, coordinate)
+        location = Location(sector_id=sector_id, position=coordinate.json)
         session.add(location)
         session.flush()
 

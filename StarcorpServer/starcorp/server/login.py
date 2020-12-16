@@ -203,7 +203,7 @@ def load_player(message):  # pylint: disable=unused-argument
         current_user.ship = create_initial_ship()
 
     ship = current_user.ship
-    LOGGER.debug(f"Loaded current user ship: {current_user.ship}")
+    LOGGER.debug(f"Loaded current user ship: {ship}")
 
     ACTIVE_PLAYERS.add(current_user.value)
 
