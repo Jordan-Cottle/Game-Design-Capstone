@@ -45,20 +45,21 @@ public class CityManager : MonoBehaviour
         socket.Register("resources_sold", (ev) =>
         {
             var data = ev.Data[0];
-            var playerData = data["player"];
             var cityData = data["city"];
 
-            this.playerMoney = (float)playerData["money"];
+            this.playerMoney = (float)data["new_balance"];
 
+            var resourceType = (string)data["resource_type"];
+
+            Debug.Log($"Sold {resourceType} to city");
+
+            this.controller.ResourceManager.Set(resourceType, (int)data["now_held"]);
+
+            var position = new Position((string)cityData["position"]);
+            City city = this.cities[position];
+            Debug.Log($"Updating {city} with: {cityData}");
             var cityResources = cityData["resources"];
-            foreach (var resource in (JObject)playerData["resources"])
-            {
-                this.controller.ResourceManager.Set(resource.Key, (int)resource.Value);
-
-                var position = new Position((string)cityData["position"]);
-                City city = this.cities[position];
-                city.resources[resource.Key] = (int)cityResources[resource.Key];
-            }
+            city.resources[resourceType] = (int)cityResources[resourceType];
         });
 
         socket.Emit("get_cities");
