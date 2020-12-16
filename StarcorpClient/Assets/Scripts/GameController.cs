@@ -63,9 +63,9 @@ public class GameController : MonoBehaviour
         this.socket.Register("player_logout", (ev) =>
         {
             Debug.Log("Processing logout event");
-            string uuid = (string)ev.Data[0]["uuid"];
+            string id = (string)ev.Data[0]["id"];
 
-            Destroy(this.objectManager.Get(uuid));
+            Destroy(this.objectManager.Get(id));
         });
 
         this.socket.Emit("player_load");
@@ -112,6 +112,6 @@ public class GameController : MonoBehaviour
     void OnApplicationQuit()
     {
         this.socket.Emit("logout");
-        // this.socket.Close();
+        this.socket.Close();
     }
 }
