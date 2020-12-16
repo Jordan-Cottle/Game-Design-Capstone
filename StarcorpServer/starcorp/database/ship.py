@@ -78,3 +78,5 @@ def add_resources(session, resource, amount, ship):
 
     LOGGER.debug(f"Adding {amount} {resource} to {ship}: {inventory_slot}")
     inventory_slot.amount += amount
+
+    return inventory_slot.amount
