@@ -1,6 +1,6 @@
 """ Module for ship related database utilities. """
 
-from database import get_by_name_or_id
+from database import get_by_name_or_id, get_location
 from models import Ship, ShipChassis, ShipInstalledSystem, ShipSystem
 
 
@@ -31,3 +31,12 @@ def create_ship(session, user, location, chassis, loadout):
     session.flush()
 
     return ship
+
+
+def move_ship(session, ship, coordinate):
+    """ Attempt to move this ship to a new location. """
+
+    if coordinate not in ship.location.coordinate.neighbors:
+        raise ValueError(f"{ship} too far away from {coordinate}")
+
+    ship.location = get_location(session, ship.location.sector, coordinate)
