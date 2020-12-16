@@ -4,7 +4,7 @@
 from flask_socketio import emit
 from global_context import RESOURCE_NODES
 
-from database import move_ship
+from database import move_ship, add_resources
 from objects import ALL_RESOURCES, City, Player
 from server import current_user, database_session, login_required, socketio
 from utils import get_logger
@@ -48,29 +48,30 @@ def move_player(message):
 def gather_resource(message):
     """ Process gather resource request from player. """
 
-    player = Player.by_user(current_user)
+    ship = current_user.ship
 
     target = Coordinate.load(message["target"])
-    LOGGER.debug(f"{player} attempting to gather at {target}")
+    LOGGER.debug(f"{ship} attempting to gather at {target}")
 
     if target not in RESOURCE_NODES:
-        message = f"{player} unable to gather at {target}: No resource node present"
+        message = f"{ship} unable to gather at {target}: No resource node present"
         LOGGER.warning(message)
         emit(
             "gather_denied",
             {"message": message},
         )
-    elif target != player.position:
-        message = f"{player} unable to gather at {target}: Too far away"
+    elif target != ship.location.coordinate:
+        message = f"{ship} unable to gather at {target}: Too far away"
         LOGGER.warning(message)
         emit("gather_denied", {"message": message})
     else:
         resource = RESOURCE_NODES[target]
 
-        player.resources[resource] += 5
-        player.store(player.uuid)
+        amount = ship.gather_power
+        add_resources(database_session, resource, amount, ship)
+        database_session.commit()
 
-        emit("resource_gathered", player)
+        emit("resource_gathered", {"resource_type": resource.value, "amount": amount})
 
 
 @socketio.on("sell_resource")

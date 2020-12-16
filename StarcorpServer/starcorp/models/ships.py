@@ -118,6 +118,13 @@ class Ship(Base):
             f"chassis_id={self.chassis_id})"
         )
 
+    @property
+    def gather_power(self):
+        """ The amount of resources that can eb gathered at one time. """
+
+        # TODO: update to calculate from installed systems
+        return 3
+
 
 class ShipInstalledSystem(Base):
     """ Table for tracking the equipment on a ship. """
@@ -158,7 +165,7 @@ class ShipInventory(Base):
     resource_type = relationship("ResourceType")
 
     def __str__(self) -> str:
-        return f"{self.resource_type} held by {self.ship}"
+        return f"{self.amount} {self.resource_type} held by {self.ship}"
 
     def __repr__(self) -> str:
         return (
