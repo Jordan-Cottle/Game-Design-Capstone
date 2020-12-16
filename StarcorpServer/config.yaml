@@ -21,3 +21,12 @@ game:
   static_data: /home/pi/Starcorp/Game-Design-Capstone/StarcorpServer/starcorp/data/game_data.yaml
   cities:
     starting_population: 100
+  players:
+    default_ship:
+      sector: Arula
+      location: -4,1,3
+      chassis: Minnow
+      loadout:
+        - Scrapper's Engine Mk 0
+        - Scrapper's Laser Mk 0
+        - Scrapper's Cargo Bay Mk 0

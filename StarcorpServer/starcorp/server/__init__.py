@@ -8,7 +8,7 @@ from uuid import uuid4
 
 import flask
 from flask import Flask
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, disconnect
 
 from data import CONFIG, TYPE_META, Decoder, Encoder, Serializable
 from exceptions import HttpError, SocketIOEventError

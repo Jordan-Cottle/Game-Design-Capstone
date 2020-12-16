@@ -5,9 +5,8 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 
-from models import Base
-
 from utils import get_logger
+from models import Base
 
 LOGGER = get_logger(__name__)
 
@@ -25,7 +24,7 @@ class User(Base):
 
     last_seen = Column(DateTime, default=datetime.today, nullable=False)
 
-    ship = relationship("Ship", cascade="all, delete-orphan")
+    ship = relationship("Ship", cascade="all, delete-orphan", uselist=False)
 
     def ping(self):
         """ Update last seen time. """

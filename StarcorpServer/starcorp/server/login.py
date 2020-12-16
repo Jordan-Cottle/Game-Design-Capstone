@@ -1,17 +1,16 @@
 """ Module for all events related to log in/out. """
 import json
-import uuid
 from datetime import datetime, timedelta
 from functools import wraps
-from http import HTTPStatus
 
 import eventlet
-from database import DatabaseSession, create_user, get_user, login_user
+from data import CONFIG
+from database import DatabaseSession, create_user, login_user, create_ship, get_location
 from flask import request, session
-from flask_socketio import disconnect, emit
-from database.user import LoginError
+from flask_socketio import emit
+from database.ship import get_chassis, get_ship_system
+from database.world import get_sector
 from global_context import PLAYERS
-from objects import Player
 from utils import get_logger
 from world import Coordinate
 
@@ -88,6 +87,28 @@ class SessionProxy:
 
 current_user = SessionProxy("user")
 database_session = SessionProxy("database session")
+
+ACTIVE_PLAYERS = set()
+
+
+def create_initial_ship():
+    """ Create default ship for a player. """
+
+    ship_config = CONFIG.get("game.players.default_ship")
+    sector = get_sector(database_session, sector_name=ship_config["sector"])
+    location = get_location(
+        database_session, sector, Coordinate.load(ship_config["location"])
+    )
+    chassis = get_chassis(database_session, name=ship_config["chassis"])
+
+    loadout = []
+    for system_name in ship_config["loadout"]:
+        system = get_ship_system(database_session, name=system_name)
+        loadout.append(system)
+
+    ship = create_ship(database_session, current_user, location, chassis, loadout)
+    database_session.commit()
+    return ship
 
 
 def login_required(func):
@@ -166,25 +187,29 @@ def socket_login(message):
 def load_player(message):  # pylint: disable=unused-argument
     """ Load a player into the world. """
 
-    LOGGER.info(f"Loading player for {current_user}")
+    LOGGER.info(f"Loading ship for {current_user}")
 
-    for player in PLAYERS.values():
-        emit("player_joined", player.json)
+    for player in ACTIVE_PLAYERS:
+        emit(
+            "player_joined",
+            {"id": player.ship.id, "position": player.ship.location.coordinate},
+        )
 
-    user_id = current_user.id
+    assert (
+        current_user.value not in ACTIVE_PLAYERS
+    ), "Players shouldn't need to load twice"
 
-    if user_id in PLAYERS:
-        player = PLAYERS[user_id]
-        LOGGER.debug(f"Existing player loaded for {current_user}")
-    else:
-        player = Player.create(current_user.name, current_user.value)
-        PLAYERS[user_id] = player
+    if current_user.ship is None:
+        current_user.ship = create_initial_ship()
 
-        player.position = Coordinate(-4, 1, 3)
-        LOGGER.info(f"New player created for {current_user}")
+    ship = current_user.ship
+    LOGGER.debug(f"Loaded current user ship: {current_user.ship}")
 
-    emit("player_load", player.json)
-    emit("player_joined", player.json, broadcast=True, include_self=False)
+    ACTIVE_PLAYERS.add(current_user.value)
+
+    ship_data = {"id": ship.id, "position": ship.location.coordinate}
+    emit("player_load", ship_data)
+    emit("player_joined", ship_data, broadcast=True, include_self=False)
 
 
 @socketio.on("logout")
@@ -201,6 +226,8 @@ def logout(message):
 
     player.store(player.uuid)
 
+    ACTIVE_PLAYERS.remove(current_user.value)
+
 
 @socketio.on("connect")
 def on_connect():
@@ -213,6 +240,11 @@ def on_connect():
 @socketio.on("disconnect")
 def on_disconnect():
     """ Handle sockets being disconnected. """
+
+    assert (
+        current_user.value not in ACTIVE_PLAYERS
+    ), "Players should be cleaned up prior to disconnecting"
+
     try:
         user_id = current_user.id
     except ProxyAccessError:
@@ -234,9 +266,8 @@ def on_disconnect():
 def monitor_players():
     """ Watch for players who haven't pinged the server in a while and log them out. """
 
-    def check_players(db_session):
-        for user_id in list(PLAYERS.keys()):
-            user = get_user(db_session, user_id)
+    def check_players():
+        for user in list(ACTIVE_PLAYERS):
             deadline = datetime.today() - timedelta(seconds=INACTIVE_TIMEOUT)
             inactive = user.last_seen < deadline
             LOGGER.debug(
@@ -246,18 +277,15 @@ def monitor_players():
                 f"== {inactive}"
             )
             if inactive:
-                player = PLAYERS.pop(user_id)
+                ACTIVE_PLAYERS.remove(user)
 
-                LOGGER.info(f"Logging out {player} due to inactivity")
+                LOGGER.info(f"Logging out {user} due to inactivity")
 
-                socketio.emit("player_logout", player.json)
-
-                player.store(player.uuid)
+                socketio.emit("player_logout", user.id)
 
     with app.app_context():
         while True:
-            with DatabaseSession() as db_session:
-                check_players(db_session)
+            check_players()
             eventlet.sleep(5)
 
 
