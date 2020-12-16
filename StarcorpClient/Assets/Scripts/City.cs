@@ -35,7 +35,7 @@ public class City : MonoBehaviour
 
     public void OnClick()
     {
-        int food = this.resources["Food"];
+        int food = this.resources["food"];
         Debug.Log($"{this.name}: {food} clicked!");
     }
 

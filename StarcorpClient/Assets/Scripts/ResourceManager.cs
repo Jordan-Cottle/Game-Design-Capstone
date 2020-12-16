@@ -38,10 +38,10 @@ public class ResourceManager : MonoBehaviour
             var data = ev.Data[0];
 
             string resource_type = (string)data["resource_type"];
-            int amount = (int)data["amount"];
+            int amount = (int)data["now_held"];
             Debug.Log($"Gathered {amount} {resource_type}");
 
-            this.resourcesCounts[resource_type] += amount;
+            this.resourcesCounts[resource_type] = amount;
         });
 
         foreach (var resource in FindObjectsOfType<Resource>())
