@@ -22,6 +22,16 @@ game:
   static_data: /home/pi/Starcorp/Game-Design-Capstone/StarcorpServer/starcorp/data/game_data.yaml
   cities:
     starting_population: 100
+    consumption:
+      food: 1
+      water: 2
+      fuel: 1
+    critical_resources:
+      - food
+      - water
+    growth_resources:
+      - food
+      - fuel
   players:
     default_ship:
       sector: Arula
