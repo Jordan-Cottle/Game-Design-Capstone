@@ -7,6 +7,7 @@ from collections import Counter
 from data import CONFIG, WORLD_CONFIG
 from database import DatabaseSession, create_resource_node, get_objects_in_sector
 from models import Location, ResourceNode, ResourceType, Sector, Tile
+from server import socketio
 from utils import get_logger
 
 LOGGER = get_logger(__name__)
@@ -120,6 +121,11 @@ def generate_resources(session, sector, resource_types):
         amount = random.randint(minimum, maximum)
 
         node = create_resource_node(session, location, resource_type, amount)
+
+        socketio.emit(
+            "resource_generated",
+            {"type": resource_type.name, "position": location.coordinate},
+        )
 
         LOGGER.info(f"Resource node created: {node}")
         session.commit()
