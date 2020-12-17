@@ -58,19 +58,20 @@ def move_ship(session, ship, coordinate):
 def add_resources(session, resource, amount, ship):
     """ Add resources to a ship's inventory. """
 
-    resource_type = session.query(ResourceType).filter_by(name=resource).one()
+    if not isinstance(resource, ResourceType):
+        resource = session.query(ResourceType).filter_by(name=resource).one()
 
     # check for existing slot to place resources in
     try:
         inventory_slot = (
             session.query(ShipInventory)
-            .filter_by(ship_id=ship.id, resource_type_id=resource_type.id)
+            .filter_by(ship_id=ship.id, resource_type_id=resource.id)
             .one()
         )
     except NoResultFound:
         LOGGER.debug(f"No inventory slot on {ship} found for {resource}, adding one")
         inventory_slot = ShipInventory()
-        inventory_slot.resource_type = resource_type
+        inventory_slot.resource_type = resource
         inventory_slot.ship = ship
 
         session.add(inventory_slot)

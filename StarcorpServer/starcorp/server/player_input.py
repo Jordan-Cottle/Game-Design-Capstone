@@ -52,25 +52,28 @@ def gather_resource(message):
     target = Coordinate.load(message["target"])
     LOGGER.debug(f"{ship} attempting to gather at {target}")
 
-    if target not in RESOURCE_NODES:
+    resource_node = ship.location.resource_node
+    LOGGER.debug(f"Resource node == {resource_node}")
+
+    if target != ship.location.coordinate:
+        message = f"{ship} unable to gather at {target}: Too far away"
+        LOGGER.warning(message)
+        emit("gather_denied", {"message": message})
+    elif ship.location.resource_node is None:
         message = f"{ship} unable to gather at {target}: No resource node present"
         LOGGER.warning(message)
         emit(
             "gather_denied",
             {"message": message},
         )
-    elif target != ship.location.coordinate:
-        message = f"{ship} unable to gather at {target}: Too far away"
-        LOGGER.warning(message)
-        emit("gather_denied", {"message": message})
     else:
-        resource = RESOURCE_NODES[target]
+        resource = resource_node.resource
 
         now_held = add_resources(database_session, resource, ship.gather_power, ship)
         database_session.commit()
 
         emit(
-            "resource_gathered", {"resource_type": resource.value, "now_held": now_held}
+            "resource_gathered", {"resource_type": resource.name, "now_held": now_held}
         )
 
 
