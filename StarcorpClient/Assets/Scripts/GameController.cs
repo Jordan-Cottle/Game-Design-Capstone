@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -83,7 +83,6 @@ public class GameController : MonoBehaviour
             foreach (var resource_node in data["resource_nodes"])
             {
                 this.ResourceManager.CreateResource((JObject)resource_node);
-                break;
             }
         });
 
