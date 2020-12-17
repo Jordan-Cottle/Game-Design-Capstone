@@ -118,3 +118,9 @@ class ResourceNode(Base):
             f"location_id={self.location_id}, "
             f"resource_id={self.resource_id})"
         )
+
+    @property
+    def json(self):
+        """ Get json representation to send to client. """
+
+        return {"type": self.resource.name, "position": self.location.coordinate}
