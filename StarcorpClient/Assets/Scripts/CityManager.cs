@@ -34,7 +34,7 @@ public class CityManager : MonoBehaviour
     {
         this.socket = socket;
 
-        socket.Register("resources_sold", (ev) =>
+        this.socket.Register("resources_sold", (ev) =>
         {
             var data = ev.Data[0];
 
@@ -47,6 +47,19 @@ public class CityManager : MonoBehaviour
 
             City city = this.controller.ObjectManager.Get("city", (string)data["city_id"]).GetComponent<City>();
             city.resources[resourceType] = (int)data["city_held"];
+        });
+
+        this.socket.Register("city_updated", (ev) =>
+        {
+            var data = ev.Data[0];
+            Debug.Log($"Updating city with {data}");
+
+            City city = this.controller.ObjectManager.Get("city", (string)data["id"]).GetComponent<City>();
+            city.population = (int)data["population"];
+            foreach (var resource in (JObject)data["resources"])
+            {
+                city.resources[resource.Key] = (int)resource.Value;
+            }
         });
     }
 
