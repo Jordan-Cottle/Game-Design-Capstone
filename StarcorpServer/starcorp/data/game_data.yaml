@@ -5,12 +5,38 @@ Sector:
         location: 0,0,0
       Tascana:
         location: 6,-4,-2
+    resources:
+      food:
+        max_nodes: 4
+        rate: 40
+        amount_range: 100-500
+      water:
+        max_nodes: 2
+        rate: 25
+        amount_range: 500-1000
+      fuel:
+        max_nodes: 8
+        rate: 10
+        amount_range: 25-50
   Carthis:
     cities:
         Alpha:
           location: 1,1,-2
         Xori:
           location: 6,-6,0
+    resources:
+      food:
+        max_nodes: 1
+        rate: 25
+        amount_range: 1200-3600
+      water:
+        max_nodes: 2
+        rate: 10
+        amount_range: 500-1000
+      fuel:
+        max_nodes: 5
+        rate: 15
+        amount_range: 125-250
 ShipChassis:
   Minnow:
     hull_points: 5
@@ -34,8 +60,14 @@ ShipSystem:
 Resources:
   food:
     base_cost: 10
+    tile_types:
+      - LUSH
   water:
     base_cost: 5
+    tile_types:
+      - AQUATIC
   fuel:
     base_cost: 25
+    tile_types:
+      - ARID
 

@@ -114,7 +114,7 @@ def generate_resource(session, name, data):
     try:
         resource_type = get_by_name_or_id(session, ResourceType, name=name)
     except NoResultFound:
-        resource_type = ResourceType(name=name, **data)
+        resource_type = ResourceType(name=name, base_cost=data["base_cost"])
         session.add(resource_type)
 
 
