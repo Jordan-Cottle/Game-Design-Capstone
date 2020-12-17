@@ -29,6 +29,7 @@ from .world import (
     get_sector,
     get_location,
     get_tile,
+    create_resource_node,
     get_city,
     get_cities,
     create_city,

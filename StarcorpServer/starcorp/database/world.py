@@ -2,10 +2,10 @@
 
 from sqlalchemy.orm.exc import NoResultFound
 
-from database import get_by_name_or_id
 from data import CONFIG
-from models import Sector, Location, City, CityResource, ResourceType
+from models import City, CityResource, Location, ResourceNode, ResourceType, Sector
 from utils import get_logger
+from database import get_by_name_or_id
 
 LOGGER = get_logger(__name__)
 
@@ -51,6 +51,18 @@ def get_tile(session, sector, coordinate):
     location = get_location(session, sector, coordinate)
 
     return location.tile
+
+
+def create_resource_node(session, location, resource_type, amount):
+    """ Create a new resource node in a sector. """
+
+    node = ResourceNode(amount=amount)
+    node.location = location
+    node.resource = resource_type
+
+    session.add(node)
+
+    return node
 
 
 def get_objects_in_sector(session, model, sector, count=False, **kwargs):
