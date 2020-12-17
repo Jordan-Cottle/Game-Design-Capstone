@@ -45,7 +45,9 @@ class Location(Base):
     city = relationship("City", cascade="all, delete-orphan", uselist=False)
 
     ships = relationship("Ship", cascade="all, delete-orphan")
-    resource_nodes = relationship("ResourceNode", cascade="all, delete-orphan")
+    resource_node = relationship(
+        "ResourceNode", cascade="all, delete-orphan", uselist=False
+    )
 
     def __str__(self) -> str:
         return f"{self.position}"
@@ -95,19 +97,24 @@ class ResourceNode(Base):
     __tablename__ = "ResourceNode"
     id = Column(Integer, primary_key=True)
 
-    location_id = Column(Integer, ForeignKey("Location.id"), nullable=False, index=True)
+    amount = Column(Integer, nullable=False)
+
+    location_id = Column(
+        Integer, ForeignKey("Location.id"), unique=True, nullable=False, index=True
+    )
     location = relationship("Location")
 
     resource_id = Column(Integer, ForeignKey("ResourceType.id"), nullable=False)
     resource = relationship("ResourceType")
 
     def __str__(self) -> str:
-        return f"{self.resource} node at {self.location}"
+        return f"{self.resource} node with {self.amount} remaining at {self.location}"
 
     def __repr__(self) -> str:
         return (
             "ResourceNode("
             f"id={self.id}, "
+            f"amount={self.amount}, "
             f"location_id={self.location_id}, "
             f"resource_id={self.resource_id})"
         )
