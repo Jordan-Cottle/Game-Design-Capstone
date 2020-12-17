@@ -20,13 +20,13 @@ public class City : MonoBehaviour
 
     public void Initialize(JObject data)
     {
-        string rss = "resources";
         Debug.Log($"Initializing with {data}");
-        Debug.Log($"Resources: {data[rss]}");
         this.name = (string)data["name"];
         this.id = (string)data["id"];
         this.population = (int)data["population"];
-        foreach (var pair in (JObject)data["resources"])
+
+        var resources = (JObject)data["resources"];
+        foreach (var pair in resources)
         {
             Debug.Log($"Setting {pair.Key}: {pair.Value}");
             this.resources[pair.Key] = (int)pair.Value;
