@@ -53,12 +53,20 @@ def get_tile(session, sector, coordinate):
     return location.tile
 
 
-def get_objects_in_sector(session, model, sector):
+def get_objects_in_sector(session, model, sector, count=False, **kwargs):
     """ Get objects of a type in a sector. """
 
     locations = session.query(Location).filter_by(sector_id=sector.id).subquery()
 
-    return session.query(model).join(locations).all()
+    query = session.query(model)
+
+    query = query.filter_by(**kwargs)
+    query = query.join(locations)
+
+    if count:
+        return query.count()
+    else:
+        return query.all()
 
 
 def get_city(session, city_id=None, city_name=None):
