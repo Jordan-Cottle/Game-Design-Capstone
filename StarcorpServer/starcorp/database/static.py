@@ -3,7 +3,7 @@
 import yaml
 from sqlalchemy.orm.exc import NoResultFound
 
-from data import CONFIG, ShipSystemAttributeType, TileType
+from data import CONFIG, WORLD_CONFIG, ShipSystemAttributeType, TileType
 from data.json_util import TYPE_META
 from data.map_gen import load
 from models import ResourceType, Sector, ShipChassis, ShipSystem, ShipSystemAttribute
@@ -108,13 +108,13 @@ def generate_config(empty=False):
     )
 
 
-def generate_resource(session, data):
+def generate_resource(session, name, data):
     """ Add resource types to the database. """
 
     try:
-        resource_type = get_by_name_or_id(session, ResourceType, name=data["name"])
+        resource_type = get_by_name_or_id(session, ResourceType, name=name)
     except NoResultFound:
-        resource_type = ResourceType(**data)
+        resource_type = ResourceType(name=name, **data)
         session.add(resource_type)
 
 
@@ -139,7 +139,6 @@ def load_map(session, map_file, sector):
 
             tile = get_tile(session, sector, coordinate)
             if tile is None:
-                print(f"Tile at {coordinate} does not exist, creating it")
                 tile = Tile(type=tile_type)
                 tile.location = get_location(session, sector, coordinate)
                 session.add(tile)
@@ -151,9 +150,7 @@ def load_map(session, map_file, sector):
 def generate_sectors(session, sectors_data):
     """ Get or create sectors using static config data. """
     print(sectors_data)
-    for sector_data in sectors_data:
-        sector_name = sector_data["name"]
-
+    for sector_name, sector_data in sectors_data.items():
         try:
             sector = get_sector(session, sector_name=sector_name)
         except NoResultFound:
@@ -162,9 +159,7 @@ def generate_sectors(session, sectors_data):
             session.add(sector)
 
         cities_data = sector_data.pop("cities")
-        for city_data in cities_data:
-            city_name = city_data["name"]
-
+        for city_name, city_data in cities_data.items():
             try:
                 get_city(session, city_name=city_name)
             except NoResultFound:
@@ -181,28 +176,25 @@ def generate_chassis(session, chassis_data):
 
     print(chassis_data)
 
-    for chassis_datum in chassis_data:
-        chassis_name = chassis_datum["name"]
+    for chassis_name, chassis_datum in chassis_data.items():
         try:
             chassis = get_chassis(session, name=chassis_name)
         except NoResultFound:
 
-            chassis = ShipChassis(**chassis_datum)
+            chassis = ShipChassis(name=chassis_name, **chassis_datum)
             session.add(chassis)
 
 
-def generate_ship_system(session, system_data):
+def generate_ship_system(session, system_name, system_attributes_data):
     """ Generate a ship system with all of its attributes from config data. """
 
-    print(system_data)
-    system_name = system_data["name"]
+    print(system_attributes_data)
     try:
         ship_system = get_ship_system(session, name=system_name)
     except NoResultFound:
         print(f"Ship sub-system {system_name} not found, creating it.")
 
-        system_attributes_data = system_data.pop("attributes")
-        ship_system = ShipSystem(**system_data)
+        ship_system = ShipSystem(name=system_name)
         session.add(ship_system)
 
         for attribute_type, value in system_attributes_data.items():
@@ -216,20 +208,17 @@ def generate_ship_system(session, system_data):
 def push_config():
     """ Push config data into the database. """
 
-    with open(CONFIG.get("game.static_data")) as data_file:
-        config = yaml.safe_load(data_file.read())
-
     session = DatabaseSession()
 
-    for resource_data in config["Resources"]:
-        generate_resource(session, resource_data)
+    for name, values in WORLD_CONFIG.get("Resources").items():
+        generate_resource(session, name, values)
 
-    generate_sectors(session, config["Sector"])
+    generate_sectors(session, WORLD_CONFIG.get("Sector"))
 
-    generate_chassis(session, config["ShipChassis"])
+    generate_chassis(session, WORLD_CONFIG.get("ShipChassis"))
 
-    for system_data in config["ShipSystem"]:
-        generate_ship_system(session, system_data)
+    for name, system_data in WORLD_CONFIG.get("ShipSystem").items():
+        generate_ship_system(session, name, system_data)
 
     session.commit()
     session.close()

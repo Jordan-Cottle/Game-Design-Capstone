@@ -1,44 +1,41 @@
 Sector:
-- name: Arula
-  cities:
-  - name: New Yorund
-    location: 0,0,0
-  - name: Tascana
-    location: 6,-4,-2
-- name: Carthis
-  cities:
-  - name: Alpha
-    location: 1,1,-2
-  - name: Xori
-    location: 6,-6,0
+  Arula:
+    cities:
+      New Yorund:
+        location: 0,0,0
+      Tascana:
+        location: 6,-4,-2
+  Carthis:
+    cities:
+        Alpha:
+          location: 1,1,-2
+        Xori:
+          location: 6,-6,0
 ShipChassis:
-- name: Minnow
-  hull_points: 5
-  hard_points: 1
-  components: 1
-  modules: 1
-  base_cost: 0
+  Minnow:
+    hull_points: 5
+    hard_points: 1
+    components: 1
+    modules: 1
+    base_cost: 0
 ShipSystem:
-- name: Scrapper's Engine Mk 0
-  attributes:
+  Scrapper's Engine Mk 0:
     base_cost: 0.0
     component_cost: 1.0
     speed: 3.0
-- name: Scrapper's Laser Mk 0
-  attributes:
+  Scrapper's Laser Mk 0:
     base_cost: 0.0
     hard_point_cost: 1.0
     power: 3.0
-- name: Scrapper's Cargo Bay Mk 0
-  attributes:
+  Scrapper's Cargo Bay Mk 0:
     base_cost: 0.0
     module_cost: 1.0
     size: 30.0
 Resources:
-  - name: "food"
+  food:
     base_cost: 10
-  - name: "water"
+  water:
     base_cost: 5
-  - name: "fuel"
+  fuel:
     base_cost: 25
 
