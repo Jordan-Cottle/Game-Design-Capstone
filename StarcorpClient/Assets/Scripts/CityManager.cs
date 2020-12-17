@@ -19,6 +19,7 @@ public class CityManager : MonoBehaviour
     private Socket socket;
 
     private Dictionary<Position, City> cities;
+    private int cityCount = 0;
 
 
     // Start is called before the first frame update
@@ -32,17 +33,6 @@ public class CityManager : MonoBehaviour
     public void Initialize(Socket socket)
     {
         this.socket = socket;
-        int cityCount = 0;
-        socket.Register("load_city", (ev) =>
-        {
-            var data = ev.Data[0];
-
-            Debug.Log($"Loading city from {data}");
-
-            City city = this.CreateCity((JObject)data);
-
-            city.label = this.cityLabels[cityCount++];
-        });
 
         socket.Register("resources_sold", (ev) =>
         {
@@ -58,23 +48,21 @@ public class CityManager : MonoBehaviour
             City city = this.controller.ObjectManager.Get("city", (string)data["city_id"]).GetComponent<City>();
             city.resources[resourceType] = (int)data["city_held"];
         });
-
-        socket.Emit("get_cities");
     }
 
-    City CreateCity(JObject data)
+    public City CreateCity(JObject data)
     {
+        Debug.Log($"Creating city from {data}");
         Position position = new Position((string)data["position"]);
-
-
         Vector3 worldPos = controller.gameGrid.getWorldPosition(position);
 
         City city = Instantiate(cityPrefab, worldPos, Quaternion.identity);
-
         city.Initialize(data);
 
         this.controller.ObjectManager.Track("city", (string)data["id"], city.gameObject);
         this.cities.Add(position, city);
+
+        city.label = this.cityLabels[this.cityCount++];
 
         return city;
     }

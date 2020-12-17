@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -48,6 +48,7 @@ public class GameController : MonoBehaviour
     void Initialize()
     {
         this.objectManager.SetUp(this.socket);
+        this.CityManager.Initialize(this.socket);
 
         this.socket.Register("player_load", (ev) =>
         {
@@ -56,7 +57,6 @@ public class GameController : MonoBehaviour
 
             this.mainCamera.transform.SetParent(this.player.transform, false);
 
-            this.CityManager.Initialize(this.socket);
             this.ResourceManager.Initialize(this.socket);
         });
 
@@ -69,6 +69,19 @@ public class GameController : MonoBehaviour
         });
 
         this.socket.Emit("player_load");
+
+        this.socket.Register("sector_load", (ev) =>
+        {
+            var data = ev.Data[0];
+            Debug.Log($"Loading sector from {data}");
+
+            foreach (var city in data["cities"])
+            {
+                this.CityManager.CreateCity((JObject)city);
+            }
+        });
+
+        this.socket.Emit("load_sector");
     }
 
     IEnumerator MovePlayerTo(Vector3 screenPosition)
