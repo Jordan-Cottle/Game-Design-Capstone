@@ -3,18 +3,23 @@
 import random
 import time
 from collections import Counter
+from functools import partial
 
 from data import CONFIG, WORLD_CONFIG
 from database import DatabaseSession, create_resource_node, get_objects_in_sector
-from models import Location, ResourceNode, ResourceType, Sector, Tile
+from models import City, Location, ResourceNode, ResourceType, Sector, Tile
 from server import socketio
 from utils import get_logger
+
 
 LOGGER = get_logger(__name__)
 
 import eventlet
 
 TICK_DURATION = CONFIG.get("game.tick_duration")
+CONSUMPTION_RATIOS = CONFIG.get("game.cities.consumption")
+CRITICAL_RESOURCES = CONFIG.get("game.cities.critical_resources")
+GROWTH_RESOURCES = CONFIG.get("game.cities.critical_resources")
 
 RESOURCE_TILES = {}
 SECTOR_RESOURCE_TICKS = {}
@@ -65,6 +70,10 @@ def tick(session):
 
     for sector in session.query(Sector).all():
         generate_resources(session, sector, resource_types)
+
+    for city in session.query(City).all():
+        tick_city(city)
+    session.commit()
 
 
 def generate_resources(session, sector, resource_types):
@@ -128,4 +137,67 @@ def generate_resources(session, sector, resource_types):
         )
 
         LOGGER.info(f"Resource node created: {node}")
-        session.commit()
+
+
+def process_surplus(surplus, resource, city, city_slot):
+    """ Process having a surplus of a resource. """
+
+    if resource not in GROWTH_RESOURCES or surplus == 0:
+        return
+
+    growth = min(city.population // 100, surplus // CONSUMPTION_RATIOS[resource])
+    LOGGER.info(f"{city} has enough surplus of {resource} to grow by {growth}")
+    city_slot.amount -= growth * CONSUMPTION_RATIOS[resource]
+    city.population += growth
+
+
+def process_deficit(deficit, resource, city, city_slot):
+    """ Process having a deficit of a resource. """
+
+    city_slot.amount = 0
+
+    if resource not in CRITICAL_RESOURCES:
+        return
+
+    casualties = deficit // CONSUMPTION_RATIOS[resource]
+    LOGGER.debug(
+        f"{city} starving from lack of {resource}: {casualties} population lost!"
+    )
+    city.population -= casualties
+
+
+def tick_city(city):
+    """ Process city resource consumption and growth. """
+
+    city_volume = city.population // 100
+
+    city_resources = {
+        resource_slot.resource.name: resource_slot for resource_slot in city.resources
+    }
+
+    critical = False
+    growth_triggers = []
+    for resource, slot in city_resources.items():
+        demand = CONSUMPTION_RATIOS[resource] * city_volume
+
+        LOGGER.debug(f"{slot}")
+        need = demand - slot.amount
+        if need <= 0:
+            LOGGER.debug(
+                f"{city} has enough {resource} to consume {demand} with {-need} left over"
+            )
+            slot.amount -= demand
+            growth_triggers.append(
+                partial(process_surplus, -need, resource, city, slot)
+            )
+        else:
+            LOGGER.debug(f"{city} does not have enough to consume {demand}")
+            process_deficit(need, resource, city, slot)
+            critical = True
+
+    if not critical:
+        for trigger in growth_triggers:
+            trigger()
+
+    LOGGER.info(f"{city} population {city.population} updated")
+    socketio.emit("city_updated", city)
