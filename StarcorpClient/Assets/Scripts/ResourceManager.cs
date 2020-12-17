@@ -100,6 +100,11 @@ public class ResourceManager : MonoBehaviour
                 Debug.Log("WARNING: Server attempt to exhaust a non-existent resource");
             }
         });
+
+        this.socket.Register("resource_generated", (ev) =>
+        {
+            this.CreateResource((JObject)ev.Data[0]);
+        });
     }
 
     public void Set(string resourceType, int value)
