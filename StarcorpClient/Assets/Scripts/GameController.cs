@@ -79,6 +79,12 @@ public class GameController : MonoBehaviour
             {
                 this.CityManager.CreateCity((JObject)city);
             }
+
+            foreach (var resource_node in data["resource_nodes"])
+            {
+                this.ResourceManager.CreateResource((JObject)resource_node);
+                break;
+            }
         });
 
         this.socket.Emit("load_sector");

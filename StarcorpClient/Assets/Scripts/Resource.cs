@@ -8,18 +8,13 @@ public class Resource : MonoBehaviour
     public string type;
 
     public Position position;
-    public string pos; // TODO: Remove when Resources are loaded from server
-    void Start()
-    {
-        this.position = new Position(pos);
-        Debug.Log($"{this.type} at {this.position}");
 
-    }
-
-    public void Initialize()
+    public void Initialize(Position position)
     {
+        this.position = position;
         HexGrid hexGrid = FindObjectOfType<HexGrid>();
         Vector3 worldPos = hexGrid.getWorldPosition(this.position);
+        worldPos.z = -0.25f;
         this.transform.position = worldPos;
     }
 }
