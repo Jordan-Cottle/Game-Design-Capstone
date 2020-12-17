@@ -4,12 +4,29 @@
 from flask_socketio import emit
 
 from database import add_resources, get_city, move_ship, sell_to_city
-from global_context import RESOURCE_NODES
 from server import current_user, database_session, login_required, socketio
 from utils import get_logger
 from world import Coordinate
 
 LOGGER = get_logger(__name__)
+
+
+def gather_resources(session, resource_node, gather_power):
+    """ Attempt to gether resources from a node and return the amount found. """
+
+    if resource_node.amount >= gather_power:
+        amount = gather_power
+    else:
+        amount = resource_node.amount
+
+    resource_node.amount -= amount
+    LOGGER.debug(f"{amount} gathered from {resource_node}")
+
+    if resource_node.amount <= 0:
+        LOGGER.info(f"{resource_node} exhausted")
+        session.delete(resource_node)
+
+    return amount
 
 
 @socketio.on("player_move")
@@ -69,7 +86,8 @@ def gather_resource(message):
     else:
         resource = resource_node.resource
 
-        now_held = add_resources(database_session, resource, ship.gather_power, ship)
+        amount = gather_resources(database_session, resource_node, ship.gather_power)
+        now_held = add_resources(database_session, resource, amount, ship)
         database_session.commit()
 
         emit(
