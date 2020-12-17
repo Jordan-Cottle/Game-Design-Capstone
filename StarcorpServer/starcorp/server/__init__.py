@@ -78,3 +78,5 @@ socketio.init_app(app, json=flask.json, logger=LOGGER)
 from .login import *
 from .player_input import *
 from .data_requests import *
+
+from .game_loop import main_loop

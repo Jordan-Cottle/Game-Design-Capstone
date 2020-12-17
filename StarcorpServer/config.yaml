@@ -18,6 +18,7 @@ database:
   engine:
     url: sqlite:///starcorp.db
 game:
+  tick_duration: 10
   static_data: /home/pi/Starcorp/Game-Design-Capstone/StarcorpServer/starcorp/data/game_data.yaml
   cities:
     starting_population: 100
