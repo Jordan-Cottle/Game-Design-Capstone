@@ -5,7 +5,7 @@ import os
 
 STORAGE_DIR = os.environ["DATA_STORE"]
 
-from .config import CONFIG
+from .config import CONFIG, WORLD_CONFIG
 from .enums import (
     Action,
     Resource,

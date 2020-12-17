@@ -36,3 +36,5 @@ class Config:
 
 
 CONFIG = Config()
+
+WORLD_CONFIG = Config(CONFIG.get("game.static_data"))
