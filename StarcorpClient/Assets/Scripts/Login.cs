@@ -62,9 +62,8 @@ public class Login : MonoBehaviour
 
             this.socket.Register("player_logout", (eve) =>
             {
-                Debug.Log("Checking for client being logged out due to inactivity");
-                string userID = (string)eve.Data[0]
-            ["user_id"];
+                string userID = (string)eve.Data[0];
+                Debug.Log($"Checking for client being logged out due to inactivity: {userID}");
 
                 Debug.Log($"This: {this.socket.userID}, Other: {userID}");
                 if (userID == this.socket.userID)
