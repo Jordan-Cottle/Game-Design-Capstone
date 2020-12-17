@@ -80,6 +80,26 @@ public class ResourceManager : MonoBehaviour
 
             this.resourcesCounts[resource_type] = amount;
         });
+
+        this.socket.Register("resource_exhausted", (ev) =>
+        {
+            var data = ev.Data[0];
+
+            Position position = new Position((string)data["position"]);
+
+            if (this.resources.ContainsKey(position))
+            {
+                Resource resource = this.resources[position];
+                Debug.Log($"{resource} at {position} exhausted");
+
+                Destroy(resource.gameObject);
+                this.resources.Remove(position);
+            }
+            else
+            {
+                Debug.Log("WARNING: Server attempt to exhaust a non-existent resource");
+            }
+        });
     }
 
     public void Set(string resourceType, int value)
