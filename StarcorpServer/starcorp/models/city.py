@@ -35,6 +35,21 @@ class City(Base):
             f"location_id={self.location_id})"
         )
 
+    @property
+    def json(self):
+        """ Get json data to send to client. """
+
+        return {
+            "id": self.id,
+            "position": self.location.coordinate.json,
+            "name": self.name,
+            "population": self.population,
+            "resources": {
+                resource_slot.resource.name: resource_slot.amount
+                for resource_slot in self.resources
+            },
+        }
+
 
 class CityResource(Base):
     """ Model for tracking which resources a city has. """
@@ -50,7 +65,7 @@ class CityResource(Base):
     resource_id = Column(
         Integer, ForeignKey("ResourceType.id"), nullable=False, index=True
     )
-    resource = relationship("ResourceType")
+    resource = relationship("ResourceType", uselist=False)
 
     def __str__(self) -> str:
         return f"{self.city} has {self.amount} {self.resource}"
@@ -63,3 +78,9 @@ class CityResource(Base):
             f"city_id={self.city_id}, "
             f"resource_id={self.resource_id})"
         )
+
+    @property
+    def json(self):
+        """ Send json data for client. """
+
+        return {self.resource.name: self.amount}
