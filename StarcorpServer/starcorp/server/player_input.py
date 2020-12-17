@@ -24,6 +24,11 @@ def gather_resources(session, resource_node, gather_power):
 
     if resource_node.amount <= 0:
         LOGGER.info(f"{resource_node} exhausted")
+        emit(
+            "resource_exhausted",
+            {"position": resource_node.location.coordinate},
+            broadcast=True,
+        )
         session.delete(resource_node)
 
     return amount
