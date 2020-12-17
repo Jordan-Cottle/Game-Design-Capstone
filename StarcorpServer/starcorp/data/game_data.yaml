@@ -18,25 +18,6 @@ Sector:
         max_nodes: 8
         rate: 10
         amount_range: 25-50
-  Carthis:
-    cities:
-        Alpha:
-          location: 1,1,-2
-        Xori:
-          location: 6,-6,0
-    resources:
-      food:
-        max_nodes: 1
-        rate: 25
-        amount_range: 1200-3600
-      water:
-        max_nodes: 2
-        rate: 10
-        amount_range: 500-1000
-      fuel:
-        max_nodes: 5
-        rate: 15
-        amount_range: 125-250
 ShipChassis:
   Minnow:
     hull_points: 5
