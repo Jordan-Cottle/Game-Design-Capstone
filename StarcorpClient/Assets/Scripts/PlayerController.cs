@@ -22,7 +22,9 @@ public class PlayerController : MonoBehaviour
 
     public void JumpTo(Position position)
     {
-        this.transform.position = this.gameGrid.getWorldPosition(position);
+        Vector3 worldPos = this.gameGrid.getWorldPosition(position);
+        worldPos.z = -1;
+        this.transform.position = worldPos;
     }
 
 

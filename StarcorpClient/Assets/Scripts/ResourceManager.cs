@@ -13,6 +13,10 @@ public class ResourceManager : MonoBehaviour
 
     public Text display;
 
+    public Resource foodPrefab;
+    public Resource waterPrefab;
+    public Resource fuelPrefab;
+
     Socket socket;
     // Start is called before the first frame update
     void Start()
@@ -26,6 +30,39 @@ public class ResourceManager : MonoBehaviour
         this.resourcesCounts["fuel"] = 0;
 
         this.controller = GetComponent<GameController>();
+    }
+
+    public Resource CreateResource(JObject data)
+    {
+        Debug.Log($"Creating resource from: {data}");
+
+        string type = (string)data["type"];
+        Resource resource;
+
+        switch (type)
+        {
+            case "food":
+                resource = this.foodPrefab;
+                break;
+            case "water":
+                resource = this.waterPrefab;
+                break;
+            case "fuel":
+                resource = this.fuelPrefab;
+                break;
+            default:
+                throw new KeyNotFoundException($"Unrecognized resource type: {name}");
+        }
+
+        Position position = new Position((string)data["position"]);
+
+        Debug.Log($"Creating {type} node at {position}");
+
+        resource = Instantiate<Resource>(resource);
+        resource.Initialize(position);
+
+        this.resources[position] = resource;
+        return resource;
     }
 
     // Update is called once per frame
@@ -43,12 +80,6 @@ public class ResourceManager : MonoBehaviour
 
             this.resourcesCounts[resource_type] = amount;
         });
-
-        foreach (var resource in FindObjectsOfType<Resource>())
-        {
-            resource.Initialize();
-            this.resources[resource.position] = resource;
-        }
     }
 
     public void Set(string resourceType, int value)
@@ -68,6 +99,7 @@ public class ResourceManager : MonoBehaviour
             if (this.resources.ContainsKey(pos))
             {
                 resource = this.resources[pos];
+                Debug.Log($"Click on {resource} detected!");
 
                 JObject obj = new JObject();
 
@@ -85,15 +117,9 @@ public class ResourceManager : MonoBehaviour
     public override string ToString()
     {
         string output = "~~Resources~~\n";
-        HashSet<string> displayed = new HashSet<string>();
-        foreach (var resource in this.resources)
+        foreach (var resource in this.resourcesCounts)
         {
-            if (displayed.Contains(resource.Value.type))
-            {
-                continue;
-            }
-            output += $"{resource.Value.type} {this.resourcesCounts[resource.Value.type]}\n";
-            displayed.Add(resource.Value.type);
+            output += $"{resource.Key} {resource.Value}\n";
         }
 
         this.display.text = output;
