@@ -8,13 +8,13 @@ using Newtonsoft.Json.Linq;
 public class CityManager : MonoBehaviour
 {
     private GameController controller;
+    private CityPanelManager panelManager;
 
     public City cityPrefab;
 
     // TODO move these to somewhere more appropriate
     private float playerMoney;
     public Text playerMoneyLabel;
-    public List<Text> cityLabels;
 
     private Socket socket;
 
@@ -26,6 +26,7 @@ public class CityManager : MonoBehaviour
     void Start()
     {
         this.controller = GetComponent<GameController>();
+        this.panelManager = FindObjectOfType<CityPanelManager>();
 
         this.cities = new Dictionary<Position, City>();
     }
@@ -46,7 +47,8 @@ public class CityManager : MonoBehaviour
             this.controller.ResourceManager.Set(resourceType, (int)data["now_held"]);
 
             City city = this.controller.ObjectManager.Get("city", (string)data["city_id"]).GetComponent<City>();
-            city.resources[resourceType] = (int)data["city_held"];
+            city.amounts[resourceType] = (int)data["city_held"];
+            this.panelManager.LoadCity(city);
         });
 
         this.socket.Register("city_updated", (ev) =>
@@ -58,7 +60,7 @@ public class CityManager : MonoBehaviour
             city.population = (int)data["population"];
             foreach (var resource in (JObject)data["resources"])
             {
-                city.resources[resource.Key] = (int)resource.Value;
+                city.amounts[resource.Key] = (int)resource.Value;
             }
         });
     }
@@ -74,8 +76,6 @@ public class CityManager : MonoBehaviour
 
         this.controller.ObjectManager.Track("city", (string)data["id"], city.gameObject);
         this.cities.Add(position, city);
-
-        city.label = this.cityLabels[this.cityCount++];
 
         return city;
     }
@@ -94,7 +94,7 @@ public class CityManager : MonoBehaviour
             {
                 city = this.cities[pos];
 
-                city.OnClick();
+                this.panelManager.LoadCity(city);
 
                 JObject obj = new JObject();
                 obj["city_id"] = city.id;
