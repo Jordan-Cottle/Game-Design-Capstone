@@ -11,7 +11,6 @@ LOGGER = get_logger(__name__)
 
 
 CITY_START_POP = CONFIG.get("game.cities.starting_population")
-CONSUMPTION_RATES = CONFIG.get("game.cities.consumption")
 
 
 def get_sector(session, sector_name=None, sector_id=None):
@@ -111,16 +110,6 @@ def create_city(session, name, location):
     return city
 
 
-def get_price(resource_type, city, city_resource):
-    """ Get price of a resource in a city. """
-
-    saturation = max(city_resource.amount, CITY_START_POP / 2) / (
-        city.population * CONSUMPTION_RATES[resource_type.name]
-    )
-
-    return resource_type.base_cost / saturation
-
-
 def sell_to_city(session, resource_type, amount, city):
     """ Sell a number of resources to a city. """
 
@@ -130,7 +119,7 @@ def sell_to_city(session, resource_type, amount, city):
         .one()
     )
 
-    price = get_price(resource_type, city, city_resource)
+    price = city_resource.price
     LOGGER.debug(f"Price of {resource_type} in {city}: {price}")
 
     profit = amount * price

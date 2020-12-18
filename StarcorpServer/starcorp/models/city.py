@@ -3,7 +3,10 @@
 from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 
+from data import CONFIG
 from models import Base
+
+CONSUMPTION_RATES = CONFIG.get("game.cities.consumption")
 
 
 class City(Base):
@@ -44,10 +47,7 @@ class City(Base):
             "position": self.location.coordinate.json,
             "name": self.name,
             "population": self.population,
-            "resources": {
-                resource_slot.resource.name: resource_slot.amount
-                for resource_slot in self.resources
-            },
+            "resources": {slot.resource.name: slot for slot in self.resources},
         }
 
 
@@ -80,7 +80,17 @@ class CityResource(Base):
         )
 
     @property
+    def price(self):
+        """ Return price per unit of held resource. """
+
+        saturation = max(self.amount, self.city.population / 2) / (
+            self.city.population * CONSUMPTION_RATES[self.resource.name]
+        )
+
+        return self.resource.base_cost / saturation
+
+    @property
     def json(self):
         """ Send json data for client. """
 
-        return {self.resource.name: self.amount}
+        return {"amount": self.amount, "price": self.price}

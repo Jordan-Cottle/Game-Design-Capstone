@@ -156,7 +156,6 @@ def sell_resource(message):
                     "new_balance": current_user.money,
                     "resource_type": resource_type.name,
                     "now_held": resource_slot.amount,
-                    "city_id": city.id,
-                    "city_held": city_held,
+                    "city": city,
                 },
             )
