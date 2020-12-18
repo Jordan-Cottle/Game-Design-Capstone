@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using UnityEngine.UI;
 
 using Newtonsoft.Json.Linq;
 
@@ -10,13 +9,11 @@ public class HexGrid : MonoBehaviour
 {
     private Tilemap grid;
     private Dictionary<Position, GameTile> tiles;
-    private Dictionary<Position, Text> labels;
 
     [SerializeField]
     private TileData[] tileTypes;
 
     public Canvas canvas;
-    public Text textPrefab;
     private int foundCounter = 0;
 
     private Dictionary<TileBase, TileData> tileTypeData;
@@ -31,7 +28,6 @@ public class HexGrid : MonoBehaviour
     void Start()
     {
         this.tiles = new Dictionary<Position, GameTile>();
-        this.labels = new Dictionary<Position, Text>();
 
         this.grid = this.GetComponent<Tilemap>();
     }
@@ -66,23 +62,6 @@ public class HexGrid : MonoBehaviour
             Position position = new Position((string)tile["position"]);
             TileBase tileType = this.tileNames[(string)tile["type"]];
             this.grid.SetTile(position.cellPosition, tileType);
-        }
-    }
-
-    void Update()
-    {
-        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
-        Vector3Int cellPosition = this.grid.WorldToCell(worldPosition);
-
-        worldPosition.z = 0;
-
-        Position pos = new Position(cellPosition);
-        if (!this.labels.ContainsKey(pos))
-        {
-            Text label = Instantiate(textPrefab, this.grid.CellToWorld(cellPosition), Quaternion.identity, this.canvas.transform);
-            label.text = $"({cellPosition.x}, {cellPosition.y})\n {pos}";
-            this.labels[pos] = label;
         }
     }
 
@@ -126,23 +105,6 @@ public class HexGrid : MonoBehaviour
         found.clickedCount += 1;
 
         return found;
-    }
-
-    public Text getLabel(GameTile tile)
-    {
-        Text label;
-        if (!this.labels.ContainsKey(tile.position))
-        {
-            label = Instantiate(textPrefab, this.getWorldPosition(tile), Quaternion.identity, this.canvas.transform);
-            label.text = $"{this.foundCounter++}: {tile.position}\n{tile.cellPosition}";
-            this.labels[tile.position] = label;
-        }
-        else
-        {
-            label = this.labels[tile.position];
-        }
-
-        return label;
     }
 
     public Vector3 getWorldPosition(Position position)
