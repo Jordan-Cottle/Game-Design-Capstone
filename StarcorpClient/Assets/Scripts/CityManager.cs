@@ -18,7 +18,7 @@ public class CityManager : MonoBehaviour
 
     private Socket socket;
 
-    private Dictionary<Position, City> cities;
+    public Dictionary<Position, City> cities;
     private int cityCount = 0;
 
 
@@ -48,7 +48,6 @@ public class CityManager : MonoBehaviour
 
             City city = this.controller.ObjectManager.Get("city", (string)data["city_id"]).GetComponent<City>();
             city.amounts[resourceType] = (int)data["city_held"];
-            this.panelManager.LoadCity(city);
         });
 
         this.socket.Register("city_updated", (ev) =>
@@ -93,8 +92,6 @@ public class CityManager : MonoBehaviour
             if (this.cities.ContainsKey(pos))
             {
                 city = this.cities[pos];
-
-                this.panelManager.LoadCity(city);
 
                 JObject obj = new JObject();
                 obj["city_id"] = city.id;
