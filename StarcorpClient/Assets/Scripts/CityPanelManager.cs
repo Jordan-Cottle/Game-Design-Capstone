@@ -1,10 +1,11 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+
+using UnityEngine;
 using UnityEngine.UI;
 
 public class CityPanelManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-
+    private City activeCity;
     public Text CityNameLabel;
     public Text PopulationLabel;
     public TransactionLabel FoodLabel;
@@ -14,7 +15,8 @@ public class CityPanelManager : MonoBehaviour
     public Text TotalLabel;
     public Text TotalPriceLabel;
 
-    public ResourceManager resourceManager;
+    public ResourceManager ResourceManager;
+    public PlayerManager PlayerManager;
 
     private bool _buy = false;
     public bool Buy
@@ -66,7 +68,7 @@ public class CityPanelManager : MonoBehaviour
         }
         else
         {
-            label.Selector.maxValue = resourceManager.resourcesCounts[resourceName];
+            label.Selector.maxValue = ResourceManager.resourcesCounts[resourceName];
         }
     }
 
@@ -93,6 +95,7 @@ public class CityPanelManager : MonoBehaviour
 
     public void LoadCity(City city)
     {
+        activeCity = city;
         CityNameLabel.text = city.name;
         PopulationLabel.text = $"Population: {city.population}";
 
@@ -118,5 +121,29 @@ public class CityPanelManager : MonoBehaviour
     {
         FuelLabel.SelectedCount = (int)FuelLabel.Selector.value;
         UpdateTotal();
+    }
+
+    public void Checkout(bool purchase)
+    {
+        Dictionary<string, int> chosen = new Dictionary<string, int>();
+        chosen["food"] = FoodLabel.SelectedCount;
+        chosen["water"] = WaterLabel.SelectedCount;
+        chosen["fuel"] = FuelLabel.SelectedCount;
+
+        if (purchase != Buy)
+        {
+            Buy = purchase;
+            return;
+        }
+
+        if (purchase)
+        {
+            Debug.Log("Making purchase");
+        }
+        else
+        {
+            Debug.Log("Selling goods!");
+            PlayerManager.SellResources(chosen, activeCity);
+        }
     }
 }

@@ -59,26 +59,4 @@ public class CityManager : MonoBehaviour
 
         return city;
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (Input.GetMouseButtonDown(1))
-        {
-            Debug.Log($"Processing click at {Input.mousePosition}");
-            Position pos = this.controller.gameGrid.getTile(Camera.main.ScreenToWorldPoint(Input.mousePosition)).position;
-            Debug.Log($"Processing click at cube pos {pos}");
-
-            City city;
-            if (this.cities.ContainsKey(pos))
-            {
-                city = this.cities[pos];
-
-                JObject obj = new JObject();
-                obj["city_id"] = city.id;
-                Debug.Log($"Attempting to sell to {city}");
-                this.socket.Emit("sell_resource", obj);
-            }
-        }
-    }
 }

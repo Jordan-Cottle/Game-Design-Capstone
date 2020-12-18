@@ -365,7 +365,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 322347703}
         m_TargetAssemblyTypeName: CityPanelManager, Assembly-CSharp
-        m_MethodName: set_Buy
+        m_MethodName: Checkout
         m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -548,7 +548,8 @@ MonoBehaviour:
   FuelLabel: {fileID: 1792839288}
   TotalLabel: {fileID: 1002437749}
   TotalPriceLabel: {fileID: 1767713362}
-  resourceManager: {fileID: 1583916154}
+  ResourceManager: {fileID: 1583916154}
+  PlayerManager: {fileID: 1583916152}
 --- !u!1 &354009383
 GameObject:
   m_ObjectHideFlags: 0
@@ -1880,9 +1881,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Player: {fileID: 0}
+  ResourceManager: {fileID: 1583916154}
   ObjectManager: {fileID: 1583916151}
   CityManager: {fileID: 1583916153}
   PanelManager: {fileID: 322347703}
+  playerMoneyLabel: {fileID: 58352327}
 --- !u!114 &1583916153
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1896,7 +1899,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cityPrefab: {fileID: 6601923283687795473, guid: 63680a3b4890fd14397ad2f1277067c4, type: 3}
-  playerMoneyLabel: {fileID: 58352327}
 --- !u!114 &1583916154
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1997,7 +1999,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 322347703}
         m_TargetAssemblyTypeName: CityPanelManager, Assembly-CSharp
-        m_MethodName: set_Buy
+        m_MethodName: Checkout
         m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2289,7 +2291,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Button
+  m_Text: Sell
 --- !u!222 &2040046070
 CanvasRenderer:
   m_ObjectHideFlags: 0
