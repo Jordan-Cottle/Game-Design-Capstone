@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,10 +11,6 @@ public class CityManager : MonoBehaviour
     private CityPanelManager panelManager;
 
     public City cityPrefab;
-
-    // TODO move these to somewhere more appropriate
-    private float playerMoney;
-    public Text playerMoneyLabel;
 
     private Socket socket;
 
@@ -34,21 +30,6 @@ public class CityManager : MonoBehaviour
     public void Initialize(Socket socket)
     {
         this.socket = socket;
-
-        this.socket.Register("resources_sold", (ev) =>
-        {
-            var data = ev.Data[0];
-
-            this.playerMoney = (float)data["new_balance"];
-            var resourceType = (string)data["resource_type"];
-
-            Debug.Log($"Sold {resourceType} to city");
-
-            this.controller.ResourceManager.Set(resourceType, (int)data["now_held"]);
-
-            City city = this.controller.ObjectManager.Get("city", (string)data["city_id"]).GetComponent<City>();
-            city.amounts[resourceType] = (int)data["city_held"];
-        });
 
         this.socket.Register("city_updated", (ev) =>
         {
@@ -99,10 +80,5 @@ public class CityManager : MonoBehaviour
                 this.socket.Emit("sell_resource", obj);
             }
         }
-    }
-
-    void OnGUI()
-    {
-        this.playerMoneyLabel.text = $"$ {this.playerMoney}";
     }
 }

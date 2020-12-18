@@ -1,12 +1,17 @@
-﻿using UnityEngine;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerManager : MonoBehaviour
 {
     public PlayerController Player;
 
+    public ResourceManager ResourceManager;
     public ObjectManager ObjectManager;
     public CityManager CityManager;
     public CityPanelManager PanelManager;
+
+    private float playerMoney;
+    public Text playerMoneyLabel;
 
     public void Initialize(Socket socket)
     {
@@ -34,5 +39,25 @@ public class PlayerManager : MonoBehaviour
                 PanelManager.Hide();
             }
         });
+
+        socket.Register("resources_sold", (ev) =>
+        {
+            var data = ev.Data[0];
+
+            playerMoney = (float)data["new_balance"];
+            var resourceType = (string)data["resource_type"];
+
+            Debug.Log($"Sold {resourceType} to city");
+
+            ResourceManager.Set(resourceType, (int)data["now_held"]);
+
+            City city = ObjectManager.Get("city", (string)data["city_id"]).GetComponent<City>();
+            city.amounts[resourceType] = (int)data["city_held"];
+        });
+    }
+
+    void OnGUI()
+    {
+        this.playerMoneyLabel.text = $"$ {this.playerMoney}";
     }
 }
