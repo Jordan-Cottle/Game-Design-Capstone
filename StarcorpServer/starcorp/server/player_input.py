@@ -88,6 +88,9 @@ def gather_resource(message):
             "gather_denied",
             {"message": message},
         )
+    elif ship.resources_held >= ship.carry_capacity:
+        LOGGER.debug(f"{ship} unable to gather due to full storage")
+        emit("gather_denied", {"message": "Ship storage full"})
     else:
         resource = resource_node.resource
 
