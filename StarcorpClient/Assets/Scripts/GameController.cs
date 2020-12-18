@@ -53,18 +53,15 @@ public class GameController : MonoBehaviour
     {
         this.objectManager.SetUp(this.socket);
         this.CityManager.Initialize(this.socket);
+        this.ResourceManager.Initialize(this.socket);
+        PlayerManager.Initialize(this.socket);
 
         this.socket.Register("player_load", (ev) =>
         {
             PlayerController player = this.objectManager.CreatePlayer((JObject)ev.Data[0]);
-
-            PlayerManager.Player = player;
-            PlayerManager.Initialize(this.socket);
-
-
             this.mainCamera.transform.SetParent(player.transform, false);
 
-            this.ResourceManager.Initialize(this.socket);
+            PlayerManager.Player = player;
         });
 
         this.socket.Register("player_logout", (ev) =>

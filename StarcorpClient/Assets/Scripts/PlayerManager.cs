@@ -1,5 +1,8 @@
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
+using Newtonsoft.Json.Linq;
 
 public class PlayerManager : MonoBehaviour
 {
@@ -10,12 +13,14 @@ public class PlayerManager : MonoBehaviour
     public CityManager CityManager;
     public CityPanelManager PanelManager;
 
+    private Socket Socket;
     private float playerMoney;
     public Text playerMoneyLabel;
 
     public void Initialize(Socket socket)
     {
-        socket.Register("object_moved", (ev) =>
+        Socket = socket;
+        Socket.Register("object_moved", (ev) =>
         {
             var data = ev.Data[0];
 
@@ -40,7 +45,7 @@ public class PlayerManager : MonoBehaviour
             }
         });
 
-        socket.Register("resources_sold", (ev) =>
+        Socket.Register("resources_sold", (ev) =>
         {
             var data = ev.Data[0];
 
@@ -54,6 +59,20 @@ public class PlayerManager : MonoBehaviour
             City city = ObjectManager.Get("city", (string)data["city_id"]).GetComponent<City>();
             city.amounts[resourceType] = (int)data["city_held"];
         });
+    }
+
+    public void SellResources(Dictionary<string, int> resources, City city)
+    {
+        JObject data = new JObject();
+
+        data["city_id"] = city.id;
+        foreach (var resource in resources)
+        {
+            Debug.Log($"Selling {resource.Value} {resource.Key} to {city}");
+            data[resource.Key] = resource.Value;
+        }
+
+        Socket.Emit("sell_resources", data);
     }
 
     void OnGUI()
