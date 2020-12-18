@@ -66,12 +66,7 @@ public class PlayerManager : MonoBehaviour
         JObject data = new JObject();
 
         data["city_id"] = city.id;
-        foreach (var resource in resources)
-        {
-            Debug.Log($"Selling {resource.Value} {resource.Key} to {city}");
-            data[resource.Key] = resource.Value;
-        }
-
+        data["resources"] = JConstructor.FromObject(resources);
         Socket.Emit("sell_resources", data);
     }
 
