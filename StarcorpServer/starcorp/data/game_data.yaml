@@ -8,15 +8,15 @@ Sector:
     resources:
       food:
         max_nodes: 4
-        rate: 40
+        rate: 5
         amount_range: 100-500
       water:
         max_nodes: 2
-        rate: 25
+        rate: 8
         amount_range: 500-1000
       fuel:
         max_nodes: 8
-        rate: 10
+        rate: 3
         amount_range: 25-50
 ShipChassis:
   Minnow:
@@ -38,7 +38,7 @@ ShipSystem:
   Scrapper's Cargo Bay Mk 0:
     base_cost: 0.0
     module_cost: 1.0
-    carry_capacity: 30.0
+    carry_capacity: 65.0
 Resources:
   food:
     base_cost: 10
