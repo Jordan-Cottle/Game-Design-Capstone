@@ -114,7 +114,8 @@ def generate_resources(session, sector, resource_types):
             session.query(Location)
             .filter_by(sector_id=sector.id)
             # and can spawn this kind of resource node...
-            .join(Tile, Tile.type.in_(RESOURCE_TILES[name]))
+            .join(Tile)
+            .filter(Tile.type.in_(RESOURCE_TILES[name]))
             # and don't already have a node.
             .outerjoin(ResourceNode)
             .filter(ResourceNode.id == None)
