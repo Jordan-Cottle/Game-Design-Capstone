@@ -11,7 +11,7 @@ from world import Coordinate
 LOGGER = get_logger(__name__)
 
 
-def gather_resources(session, resource_node, gather_power):
+def gather_resources(resource_node, gather_power):
     """ Attempt to gether resources from a node and return the amount found. """
 
     if resource_node.amount >= gather_power:
@@ -29,7 +29,7 @@ def gather_resources(session, resource_node, gather_power):
             {"position": resource_node.location.coordinate},
             broadcast=True,
         )
-        session.delete(resource_node)
+        database_session.delete(resource_node)
 
     return amount
 
@@ -94,7 +94,13 @@ def gather_resource(message):
     else:
         resource = resource_node.resource
 
-        amount = gather_resources(database_session, resource_node, ship.gather_power)
+        amount = gather_resources(resource_node, ship.gather_power)
+        if ship.resources_held + amount > ship.carry_capacity:
+            amount = ship.carry_capacity - ship.resources_held
+            LOGGER.debug(
+                f"{ship} only had enough space for a partial gather of {amount} from {resource}"
+            )
+
         now_held = add_resources(database_session, resource, amount, ship)
         database_session.commit()
 
