@@ -56,8 +56,13 @@ public class PlayerManager : MonoBehaviour
 
             ResourceManager.Set(resourceType, (int)data["now_held"]);
 
-            City city = ObjectManager.Get("city", (string)data["city_id"]).GetComponent<City>();
-            city.amounts[resourceType] = (int)data["city_held"];
+            var cityData = (JObject)data["city"];
+
+            City city = ObjectManager.Get("city", (string)cityData["id"]).GetComponent<City>();
+
+            var resourceData = (JObject)cityData["resources"];
+            city.amounts[resourceType] = (int)resourceData[resourceType]["amount"];
+            city.prices[resourceType] = (float)resourceData[resourceType]["price"];
         });
 
         Socket.Register("player_load", (ev) =>
