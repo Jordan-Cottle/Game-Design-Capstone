@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -79,7 +79,9 @@ public class CityPanelManager : MonoBehaviour
         }
         else
         {
-            label.Selector.maxValue = ResourceManager.resourcesCounts[resourceName];
+            int player_held = ResourceManager.resourcesCounts[resourceName];
+            label.Selector.maxValue = player_held;
+            label.Selector.value = player_held;
         }
     }
 
