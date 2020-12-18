@@ -9,13 +9,17 @@ public class City : MonoBehaviour
 {
     public string id;
     public int population;
-    public Dictionary<string, int> resources;
-
-    public Text label;
+    public Dictionary<string, int> amounts;
+    public Dictionary<string, float> prices;
 
     void Awake()
     {
-        this.resources = new Dictionary<string, int>();
+        this.amounts = new Dictionary<string, int>();
+        this.prices = new Dictionary<string, float>();
+
+        this.prices["food"] = 5;
+        this.prices["water"] = 3;
+        this.prices["fuel"] = 25;
     }
 
     public void Initialize(JObject data)
@@ -29,32 +33,7 @@ public class City : MonoBehaviour
         foreach (var pair in resources)
         {
             Debug.Log($"Setting {pair.Key}: {pair.Value}");
-            this.resources[pair.Key] = (int)pair.Value;
+            this.amounts[pair.Key] = (int)pair.Value;
         }
-    }
-
-    public void OnClick()
-    {
-        int food = this.resources["food"];
-        Debug.Log($"{this.name}: {food} clicked!");
-    }
-
-    public void OnGUI()
-    {
-        this.label.text = this.ToString();
-    }
-
-    public override string ToString()
-    {
-        string s = $"{this.name} ({this.population})\n";
-
-        foreach (var resource in this.resources)
-        {
-            s += $"{resource.Key}: {resource.Value}\n";
-        }
-
-        // TODO: Display demand and prices
-
-        return s;
     }
 }
