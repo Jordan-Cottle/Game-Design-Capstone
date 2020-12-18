@@ -16,10 +16,6 @@ public class City : MonoBehaviour
     {
         this.amounts = new Dictionary<string, int>();
         this.prices = new Dictionary<string, float>();
-
-        this.prices["food"] = 5;
-        this.prices["water"] = 3;
-        this.prices["fuel"] = 25;
     }
 
     public void Initialize(JObject data)
@@ -28,12 +24,21 @@ public class City : MonoBehaviour
         this.name = (string)data["name"];
         this.id = (string)data["id"];
         this.population = (int)data["population"];
+        UpdateResources((JObject)data["resources"]);
+    }
 
-        var resources = (JObject)data["resources"];
-        foreach (var pair in resources)
+    public void UpdateResources(JObject resources)
+    {
+        foreach (var resource in resources)
         {
-            Debug.Log($"Setting {pair.Key}: {pair.Value}");
-            this.amounts[pair.Key] = (int)pair.Value;
+            string resource_name = (string)resource.Key;
+
+            JObject resource_data = (JObject)resource.Value;
+            int amount = (int)resource_data["amount"];
+            float price = (float)resource_data["price"];
+            Debug.Log($"Setting {resource_name} in {this}: Amount->{amount}, Price->{price}");
+            this.amounts[resource_name] = amount;
+            this.prices[resource_name] = price;
         }
     }
 }

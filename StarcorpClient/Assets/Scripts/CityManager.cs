@@ -38,10 +38,7 @@ public class CityManager : MonoBehaviour
 
             City city = this.controller.ObjectManager.Get("city", (string)data["id"]).GetComponent<City>();
             city.population = (int)data["population"];
-            foreach (var resource in (JObject)data["resources"])
-            {
-                city.amounts[resource.Key] = (int)resource.Value;
-            }
+            city.UpdateResources((JObject)data["resources"]);
         });
     }
 
