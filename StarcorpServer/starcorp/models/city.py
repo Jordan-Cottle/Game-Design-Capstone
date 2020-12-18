@@ -90,6 +90,16 @@ class CityResource(Base):
         return self.resource.base_cost / saturation
 
     @property
+    def amount_in_market(self):
+        """ Return amount of resources available in market for players to purchase. """
+
+        reserved = self.city.population * 2
+        if reserved > self.amount:
+            return 0
+
+        return self.amount - reserved
+
+    @property
     def json(self):
         """ Send json data for client. """
 

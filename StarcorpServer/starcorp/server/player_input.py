@@ -166,3 +166,69 @@ def sell_resource(message):
                     "city": city,
                 },
             )
+
+
+@socketio.on("buy_resources")
+@login_required
+def buy_resource(message):
+    """ Process resource sell request from a player. """
+
+    ship = current_user.ship
+
+    city = get_city(database_session, message["city_id"])
+    resources = message["resources"]
+
+    LOGGER.debug(f"{ship} attempting to buy {resources} to {city}")
+
+    if ship.location != city.location:
+        message = f"{ship} unable to buy from {city}: Too far away"
+        LOGGER.warning(message)
+        emit(
+            "purchase_denied",
+            {"message": message},
+        )
+    else:
+        for ship_slot in ship.inventory:
+            resource_type = ship_slot.resource_type
+
+            if resource_type.name not in resources:
+                continue
+
+            volume = int(resources[resource_type.name])
+
+            if volume > ship.free_cargo_space:
+                LOGGER.warning(
+                    f"{ship} attempting to purchase more {resource_type} than it can hold!"
+                )
+                volume = ship.free_cargo_space
+
+            city_slot = get_city_resource_slot(database_session, city, resource_type)
+            if city_slot.amount_in_market < volume:
+                LOGGER.warning(
+                    f"{ship} attempting to purchase more {resource_type} than available in city's market!"
+                )
+                volume = city_slot.amount_in_market
+
+            LOGGER.info(f"{ship} buying {volume} {resource_type} units from {city}")
+
+            cost = (
+                get_cost_of_resource(database_session, resource_type, volume, city) * 2
+            )
+            if current_user.money < cost:
+                emit("purchase_denied", {"message": "Insufficient funds"})
+                continue
+
+            current_user.money -= cost
+            city_slot.amount -= volume
+            ship_slot.amount += volume
+
+            database_session.commit()
+            emit(
+                "resources_purchased",
+                {
+                    "new_balance": current_user.money,
+                    "resource_type": resource_type.name,
+                    "now_held": ship_slot.amount,
+                    "city": city,
+                },
+            )
