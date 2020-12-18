@@ -3,7 +3,8 @@
 
 from flask_socketio import emit
 
-from database import add_resources, get_city, move_ship, sell_to_city
+from database import add_resources, get_city, move_ship, get_cost_of_resource
+from database.world import get_city_resource_slot
 from server import current_user, database_session, login_required, socketio
 from utils import get_logger
 from world import Coordinate
@@ -129,13 +130,13 @@ def sell_resource(message):
             {"message": message},
         )
     else:
-        for resource_slot in ship.inventory:
-            resource_type = resource_slot.resource_type
+        for ship_slot in ship.inventory:
+            resource_type = ship_slot.resource_type
 
             if resource_type.name not in resources:
                 continue
 
-            player_held = resource_slot.amount
+            player_held = ship_slot.amount
             if player_held <= 0:
                 continue
 
@@ -148,20 +149,20 @@ def sell_resource(message):
                 volume = player_held
 
             LOGGER.info(f"{ship} selling {volume} {resource_type} units to {city}")
+            profit = get_cost_of_resource(database_session, resource_type, volume, city)
 
-            resource_slot.amount -= volume
-            profit, city_held = sell_to_city(
-                database_session, resource_type, volume, city
-            )
+            city_slot = get_city_resource_slot(database_session, city, resource_type)
+            ship_slot.amount -= volume
+            city_slot.amount += volume
             current_user.money += profit
-
             database_session.commit()
+
             emit(
                 "resources_sold",
                 {
                     "new_balance": current_user.money,
                     "resource_type": resource_type.name,
-                    "now_held": resource_slot.amount,
+                    "now_held": ship_slot.amount,
                     "city": city,
                 },
             )

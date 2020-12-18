@@ -33,7 +33,8 @@ from .world import (
     get_city,
     get_cities,
     create_city,
-    sell_to_city,
+    get_city_resource_slot,
+    get_cost_of_resource,
     get_objects_in_sector,
 )
 from .ship import get_chassis, get_ship_system, create_ship, move_ship, add_resources
