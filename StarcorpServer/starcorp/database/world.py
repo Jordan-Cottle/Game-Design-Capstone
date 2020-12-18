@@ -110,21 +110,18 @@ def create_city(session, name, location):
     return city
 
 
-def sell_to_city(session, resource_type, amount, city):
-    """ Sell a number of resources to a city. """
-
-    city_resource = (
+def get_city_resource_slot(session, city, resource_type):
+    """ Get the associated resource slot in a city. """
+    return (
         session.query(CityResource)
         .filter_by(city_id=city.id, resource_id=resource_type.id)
         .one()
     )
 
-    price = city_resource.price
-    LOGGER.debug(f"Price of {resource_type} in {city}: {price}")
 
-    profit = amount * price
+def get_cost_of_resource(session, resource_type, amount, city):
+    """ Sell a number of resources to a city. """
 
-    city_resource.amount += amount
-    LOGGER.info(f"Sold {amount} {resource_type} to {city}")
+    city_resource = get_city_resource_slot(session, city, resource_type)
 
-    return profit, city_resource.amount
+    return amount * city_resource.price
