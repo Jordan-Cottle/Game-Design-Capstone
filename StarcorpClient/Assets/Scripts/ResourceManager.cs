@@ -8,7 +8,7 @@ using Newtonsoft.Json.Linq;
 public class ResourceManager : MonoBehaviour
 {
     private Dictionary<Position, Resource> resources;
-    private Dictionary<string, int> resourcesCounts;
+    public Dictionary<string, int> resourcesCounts;
     private GameController controller;
 
     public Text display;
