@@ -8,9 +8,6 @@ using Newtonsoft.Json.Linq;
 [RequireComponent(typeof(ObjectManager))]
 public class GameController : MonoBehaviour
 {
-    // Start is called before the first frame update
-    private PlayerController player;
-
     private Camera mainCamera;
 
     private Socket socket;
@@ -30,6 +27,11 @@ public class GameController : MonoBehaviour
     {
         get; private set;
     }
+
+    public PlayerManager PlayerManager
+    {
+        get; private set;
+    }
     public HexGrid gameGrid;
 
     void Start()
@@ -42,6 +44,7 @@ public class GameController : MonoBehaviour
 
         this.CityManager = GetComponent<CityManager>();
         this.ResourceManager = GetComponent<ResourceManager>();
+        this.PlayerManager = GetComponent<PlayerManager>();
 
         this.Initialize();
     }
@@ -53,10 +56,13 @@ public class GameController : MonoBehaviour
 
         this.socket.Register("player_load", (ev) =>
         {
-            this.player = this.objectManager.CreatePlayer((JObject)ev.Data[0]);
+            PlayerController player = this.objectManager.CreatePlayer((JObject)ev.Data[0]);
+
+            PlayerManager.Player = player;
+            PlayerManager.Initialize(this.socket);
 
 
-            this.mainCamera.transform.SetParent(this.player.transform, false);
+            this.mainCamera.transform.SetParent(player.transform, false);
 
             this.ResourceManager.Initialize(this.socket);
         });
@@ -94,13 +100,14 @@ public class GameController : MonoBehaviour
 
     IEnumerator MovePlayerTo(Vector3 screenPosition)
     {
+        PlayerController player = PlayerManager.Player;
         Vector3 start;
-        if (this.player.moving)
+        if (player.moving)
         {
             yield break;
         }
 
-        start = this.player.transform.position;
+        start = player.transform.position;
 
         List<Position> positions = this.gameGrid.path(start, Camera.main.ScreenToWorldPoint(screenPosition));
 

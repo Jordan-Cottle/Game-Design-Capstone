@@ -48,12 +48,12 @@ public class CityPanelManager : MonoBehaviour
         Hide();
     }
 
-    void Hide()
+    public void Hide()
     {
         this.transform.position = new Vector3(10000, 10000, 10000);
     }
 
-    void Show()
+    public void Show()
     {
         this.transform.position = position;
     }
