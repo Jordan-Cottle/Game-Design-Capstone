@@ -19,7 +19,8 @@ import eventlet
 TICK_DURATION = CONFIG.get("game.tick_duration")
 CONSUMPTION_RATIOS = CONFIG.get("game.cities.consumption")
 CRITICAL_RESOURCES = CONFIG.get("game.cities.critical_resources")
-GROWTH_RESOURCES = CONFIG.get("game.cities.critical_resources")
+GROWTH_RESOURCES = CONFIG.get("game.cities.growth_resources")
+MINIMUM_POPULATION = CONFIG.get("game.cities.starting_population")
 
 RESOURCE_TILES = {}
 SECTOR_RESOURCE_TICKS = {}
@@ -146,7 +147,7 @@ def process_surplus(surplus, resource, city, city_slot):
     if resource not in GROWTH_RESOURCES or surplus == 0:
         return
 
-    growth = min(city.population // 100, surplus // CONSUMPTION_RATIOS[resource])
+    growth = min(city.population // 25, surplus // CONSUMPTION_RATIOS[resource])
     LOGGER.info(f"{city} has enough surplus of {resource} to grow by {growth}")
     city_slot.amount -= growth * CONSUMPTION_RATIOS[resource]
     city.population += growth
@@ -164,7 +165,11 @@ def process_deficit(deficit, resource, city, city_slot):
     LOGGER.debug(
         f"{city} starving from lack of {resource}: {casualties} population lost!"
     )
-    city.population -= casualties
+
+    if city.population <= MINIMUM_POPULATION:
+        city.population = MINIMUM_POPULATION
+    else:
+        city.population -= casualties
 
 
 def tick_city(city):
