@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -44,20 +44,31 @@ public class CityPanelManager : MonoBehaviour
     private float totalPrice;
 
     private Vector3 position;
+    bool active;
     void Awake()
     {
         position = this.transform.position;
         Hide();
     }
 
+    void OnGUI()
+    {
+        if (active)
+        {
+            LoadCity(activeCity);
+        }
+    }
+
     public void Hide()
     {
         this.transform.position = new Vector3(10000, 10000, 10000);
+        active = false;
     }
 
     public void Show()
     {
         this.transform.position = position;
+        active = true;
     }
 
     void SetUpSlider(TransactionLabel label, string resourceName)
