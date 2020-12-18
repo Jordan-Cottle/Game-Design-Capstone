@@ -40,9 +40,10 @@ class ShipSystemAttributeType(str, Enum):
     COMPONENT_COST = "component_cost"
     BASE_COST = "base_cost"
 
-    SPEED = "speed"
-    POWER = "power"
-    SIZE = "size"
+    MOVEMENT_SPEED = "movement_speed"
+    ATTACK_POWER = "attack_power"
+    GATHER_POWER = "gather_power"
+    CARRY_CAPACITY = "carry_capacity"
 
 
 class UnitType(str, Enum):
