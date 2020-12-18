@@ -103,7 +103,7 @@ def gather_resource(message):
         )
 
 
-@socketio.on("sell_resource")
+@socketio.on("sell_resources")
 @login_required
 def sell_resource(message):
     """ Process resource sell request from a player. """
@@ -111,8 +111,9 @@ def sell_resource(message):
     ship = current_user.ship
 
     city = get_city(database_session, message["city_id"])
+    resources = message["resources"]
 
-    LOGGER.debug(f"{ship} attempting to sell to {city}")
+    LOGGER.debug(f"{ship} attempting to sell {resources} to {city}")
 
     if ship.location != city.location:
         message = f"{ship} unable to sell to {city}: Too far away"
@@ -123,15 +124,22 @@ def sell_resource(message):
         )
     else:
         for resource_slot in ship.inventory:
-            player_held = resource_slot.amount
-            if 0 < player_held <= 5:
-                volume = player_held
-            elif player_held <= 0:
-                continue
-            else:
-                volume = 5
-
             resource_type = resource_slot.resource_type
+
+            if resource_type.name not in resources:
+                continue
+
+            player_held = resource_slot.amount
+            if player_held <= 0:
+                continue
+
+            volume = int(resources[resource_type.name])
+
+            if volume > player_held:
+                LOGGER.warning(
+                    f"{ship} attempting to sell more {resource_type} than it has!"
+                )
+                volume = player_held
 
             LOGGER.info(f"{ship} selling {volume} {resource_type} units to {city}")
 
