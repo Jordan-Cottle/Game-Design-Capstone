@@ -2,9 +2,9 @@ Sector:
   Arula:
     cities:
       New Yorund:
-        location: 0,0,0
+        location: -3,7,-4
       Tascana:
-        location: 6,-4,-2
+        location: 3,-3,0
     resources:
       food:
         max_nodes: 4
