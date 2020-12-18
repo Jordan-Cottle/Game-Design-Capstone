@@ -24,6 +24,16 @@ class ShipSystem(Base):
     def __repr__(self) -> str:
         return f"ShipSystem(id={self.id}, name={self.name})"
 
+    def get_attribute(self, attribute):
+        if attribute not in ShipSystemAttributeType:
+            raise AttributeError(f"{self} does not have a {attribute} attribute")
+
+        for system_attribute in self.attributes:
+            if system_attribute.type == attribute:
+                return system_attribute.value
+
+        raise AttributeError(f"{self} does not have a {attribute} attribute")
+
 
 class ShipSystemAttribute(Base):
     """ Table for tracking attributes of a ship system. """
@@ -118,12 +128,28 @@ class Ship(Base):
             f"chassis_id={self.chassis_id})"
         )
 
-    @property
-    def gather_power(self):
-        """ The amount of resources that can eb gathered at one time. """
+    def __getattribute__(self, name):
+        try:
+            attr = ShipSystemAttributeType(name)
+        except ValueError:
+            return super().__getattribute__(name)
+        else:
+            return self.get_attribute(attr)
 
-        # TODO: update to calculate from installed systems
-        return 3
+    def get_attribute(self, attribute):
+        """ Get the value for an attribute. """
+
+        if attribute not in ShipSystemAttributeType:
+            raise AttributeError(f"{self} does not have a {attribute} attribute")
+
+        total = 0
+        for installed_system in self.loadout:
+            try:
+                total += installed_system.get_attribute(attribute)
+            except AttributeError:
+                continue
+
+        return total
 
 
 class ShipInstalledSystem(Base):
@@ -148,6 +174,12 @@ class ShipInstalledSystem(Base):
             f"ship_id={self.ship_id}, "
             f"system_id='{self.system_id}')"
         )
+
+    def get_attribute(self, attribute):
+        if attribute not in ShipSystemAttributeType:
+            raise AttributeError(f"{self} does not have a {attribute} attribute")
+
+        return self.system.get_attribute(attribute)
 
 
 class ShipInventory(Base):
