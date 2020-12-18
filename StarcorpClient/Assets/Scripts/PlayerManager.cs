@@ -59,6 +59,21 @@ public class PlayerManager : MonoBehaviour
             City city = ObjectManager.Get("city", (string)data["city_id"]).GetComponent<City>();
             city.amounts[resourceType] = (int)data["city_held"];
         });
+
+        Socket.Register("player_load", (ev) =>
+        {
+            var data = ev.Data[0];
+            Position position = new Position((string)data["position"]);
+
+            if (CityManager.cities.ContainsKey(position))
+            {
+                PanelManager.LoadCity(CityManager.cities[position]);
+            }
+            else
+            {
+                PanelManager.Hide();
+            }
+        });
     }
 
     public void SellResources(Dictionary<string, int> resources, City city)

@@ -72,8 +72,6 @@ public class GameController : MonoBehaviour
             Destroy(this.objectManager.Get("player", id));
         });
 
-        this.socket.Emit("player_load");
-
         this.socket.Register("sector_load", (ev) =>
         {
             var data = ev.Data[0];
@@ -90,6 +88,8 @@ public class GameController : MonoBehaviour
             {
                 this.ResourceManager.CreateResource((JObject)resource_node);
             }
+
+            this.socket.Emit("player_load");
         });
 
         this.socket.Emit("load_sector");
