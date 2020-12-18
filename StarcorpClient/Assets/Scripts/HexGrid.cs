@@ -1,8 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
+
+using Newtonsoft.Json.Linq;
 
 [RequireComponent(typeof(Tilemap))]
 public class HexGrid : MonoBehaviour
@@ -19,6 +20,14 @@ public class HexGrid : MonoBehaviour
     private int foundCounter = 0;
 
     private Dictionary<TileBase, TileData> tileTypeData;
+    private Dictionary<string, TileBase> tileNames;
+
+    public TileBase space;
+    public TileBase lush;
+    public TileBase aquatic;
+    public TileBase arid;
+    public TileBase solar;
+
     void Start()
     {
         this.tiles = new Dictionary<Position, GameTile>();
@@ -36,6 +45,27 @@ public class HexGrid : MonoBehaviour
             {
                 tileTypeData[tile] = tileData;
             }
+        }
+
+        this.tileNames = new Dictionary<string, TileBase>();
+        this.tileNames["SPACE"] = space;
+        this.tileNames["LUSH"] = lush;
+        this.tileNames["AQUATIC"] = aquatic;
+        this.tileNames["ARID"] = arid;
+        this.tileNames["SOLAR"] = solar;
+    }
+
+    public void Initialize(JArray data)
+    {
+        Debug.Log($"Initializing tilemap with {data}");
+
+        this.grid.ClearAllTiles();
+
+        foreach (JObject tile in data)
+        {
+            Position position = new Position((string)tile["position"]);
+            TileBase tileType = this.tileNames[(string)tile["type"]];
+            this.grid.SetTile(position.cellPosition, tileType);
         }
     }
 

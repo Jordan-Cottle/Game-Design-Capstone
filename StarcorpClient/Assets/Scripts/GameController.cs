@@ -75,6 +75,8 @@ public class GameController : MonoBehaviour
             var data = ev.Data[0];
             Debug.Log($"Loading sector from {data}");
 
+            this.gameGrid.Initialize((JArray)data["tiles"]);
+
             foreach (var city in data["cities"])
             {
                 this.CityManager.CreateCity((JObject)city);
