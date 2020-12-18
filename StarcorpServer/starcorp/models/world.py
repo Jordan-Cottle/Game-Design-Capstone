@@ -90,6 +90,12 @@ class Tile(Base):
             f"location_id={self.location_id})"
         )
 
+    @property
+    def json(self):
+        """ Get json serializable form for client. """
+
+        return {"position": self.location.coordinate, "type": self.type.name}
+
 
 class ResourceNode(Base):
     """ Model for tracking gatherable resource nodes. """
