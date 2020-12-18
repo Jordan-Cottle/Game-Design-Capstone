@@ -208,8 +208,10 @@ def load_player(message):  # pylint: disable=unused-argument
     ACTIVE_PLAYERS.add(current_user.value)
 
     ship_data = {"id": ship.id, "position": ship.location.coordinate}
-    emit("player_load", ship_data)
     emit("player_joined", ship_data, broadcast=True, include_self=False)
+
+    ship_data["carry_capacity"] = ship.carry_capacity
+    emit("player_load", ship_data)
 
 
 @socketio.on("logout")
