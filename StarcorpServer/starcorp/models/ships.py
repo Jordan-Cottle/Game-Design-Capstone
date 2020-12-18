@@ -134,6 +134,12 @@ class Ship(Base):
 
         return sum(slot.amount for slot in self.inventory)
 
+    @property
+    def free_cargo_space(self):
+        """ Get the amount fo cargo space that is available. """
+
+        return self.carry_capacity - self.resources_held
+
     def __getattribute__(self, name):
         try:
             attr = ShipSystemAttributeType(name)
