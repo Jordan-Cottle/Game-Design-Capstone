@@ -90,6 +90,11 @@ public class CityPanelManager : MonoBehaviour
         int count = city.amounts[resourceName];
         float price = city.prices[resourceName];
 
+        if (Buy)
+        {
+            price *= 2;
+        }
+
         label.Count = count;
         label.Price = price;
 
@@ -152,6 +157,7 @@ public class CityPanelManager : MonoBehaviour
         if (purchase)
         {
             Debug.Log("Making purchase");
+            PlayerManager.BuyResources(chosen, activeCity);
         }
         else
         {

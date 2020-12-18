@@ -65,6 +65,26 @@ public class PlayerManager : MonoBehaviour
             city.prices[resourceType] = (float)resourceData[resourceType]["price"];
         });
 
+        Socket.Register("resources_purchased", (ev) =>
+        {
+            var data = ev.Data[0];
+
+            playerMoney = (float)data["new_balance"];
+            var resourceType = (string)data["resource_type"];
+
+            Debug.Log($"Purchased {resourceType} from city");
+
+            ResourceManager.Set(resourceType, (int)data["now_held"]);
+
+            var cityData = (JObject)data["city"];
+
+            City city = ObjectManager.Get("city", (string)cityData["id"]).GetComponent<City>();
+
+            var resourceData = (JObject)cityData["resources"];
+            city.amounts[resourceType] = (int)resourceData[resourceType]["amount"];
+            city.prices[resourceType] = (float)resourceData[resourceType]["price"];
+        });
+
         Socket.Register("player_load", (ev) =>
         {
             var data = ev.Data[0];
@@ -90,6 +110,14 @@ public class PlayerManager : MonoBehaviour
         Socket.Emit("sell_resources", data);
     }
 
+    public void BuyResources(Dictionary<string, int> resources, City city)
+    {
+        JObject data = new JObject();
+
+        data["city_id"] = city.id;
+        data["resources"] = JConstructor.FromObject(resources);
+        Socket.Emit("buy_resources", data);
+    }
     void OnGUI()
     {
         this.playerMoneyLabel.text = $"$ {this.playerMoney}";
