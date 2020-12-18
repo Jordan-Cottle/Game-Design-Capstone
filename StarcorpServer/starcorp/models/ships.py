@@ -128,6 +128,12 @@ class Ship(Base):
             f"chassis_id={self.chassis_id})"
         )
 
+    @property
+    def resources_held(self):
+        """ Get the total amount of held resources. """
+
+        return sum(slot.amount for slot in self.inventory)
+
     def __getattribute__(self, name):
         try:
             attr = ShipSystemAttributeType(name)
