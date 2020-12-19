@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 13312, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: greenHex
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: 21300000, guid: 7c5223e01cbc2954790892a663f6e9a9, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 6830f2863d9c2fd43bcf04c6d6e7bced, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1
