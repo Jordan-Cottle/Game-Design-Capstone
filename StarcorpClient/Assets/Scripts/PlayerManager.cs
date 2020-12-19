@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -104,6 +104,14 @@ public class PlayerManager : MonoBehaviour
                 PanelManager.Hide();
                 UpgradePanelManager.Hide();
             }
+        });
+
+        Socket.Register("upgrade_purchased", (ev) =>
+        {
+            var data = ev.Data[0];
+            playerMoney = (float)data["new_balance"];
+
+            UpgradePanelManager.UpdatePanels((JArray)data["systems"]);
         });
     }
 
