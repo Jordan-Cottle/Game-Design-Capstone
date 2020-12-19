@@ -3,8 +3,17 @@
 
 from flask_socketio import emit
 
-from database import add_resources, get_city, move_ship, get_cost_of_resource
-from database.world import get_city_resource_slot
+from data import ShipSystemAttributeType
+from database import (
+    add_resources,
+    get_city,
+    move_ship,
+    get_cost_of_resource,
+    get_upgrade,
+    get_city_resource_slot,
+    upgrade_component,
+)
+from database.ship import get_systems
 from server import current_user, database_session, login_required, socketio
 from utils import get_logger
 from world import Coordinate
@@ -232,3 +241,48 @@ def buy_resource(message):
                     "city": city,
                 },
             )
+
+
+@socketio.on("purchase_upgrade")
+def handle_upgrade_purchase(message):
+    system_name = message["system_name"]
+    ship = current_user.ship
+
+    LOGGER.info(f"{ship} requested to upgrade {system_name}")
+
+    for slot in current_user.ship.loadout:
+        if slot.system.name == system_name:
+            installed_system = slot
+            upgrade = get_upgrade(database_session, slot.system)
+            break
+    else:
+        LOGGER.warning(f"{ship} requested invalid upgrade of {system_name}")
+        emit("upgrade_denied", {"message": "Requested component not on ship!"})
+        return
+
+    if upgrade is None:
+        LOGGER.warning(f"{ship} requested invalid upgrade of {system_name}")
+        emit(
+            "upgrade_denied",
+            {"message": "Requested component does not have an upgrade"},
+        )
+        return
+
+    upgrade_cost = upgrade.get_attribute(ShipSystemAttributeType.BASE_COST)
+    if current_user.money < upgrade_cost:
+        LOGGER.debug(f"{current_user} doesn't have enough money for {system_name}")
+        emit(
+            "upgrade_denied", {"message": "Insufficient funds to purchase the upgrade"}
+        )
+        return
+
+    current_user.money -= upgrade_cost
+    upgrade_component(database_session, ship, installed_system, upgrade)
+    database_session.commit()
+
+    data = {
+        "new_balance": current_user.money,
+        "systems": get_systems(database_session, ship),
+    }
+
+    emit("upgrade_purchased", data)
