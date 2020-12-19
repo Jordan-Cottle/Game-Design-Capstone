@@ -47,6 +47,7 @@ public class CityManager : MonoBehaviour
         Debug.Log($"Creating city from {data}");
         Position position = new Position((string)data["position"]);
         Vector3 worldPos = controller.gameGrid.getWorldPosition(position);
+        worldPos.z = -1;
 
         City city = Instantiate(cityPrefab, worldPos, Quaternion.identity);
         city.Initialize(data);
