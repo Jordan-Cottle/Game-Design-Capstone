@@ -26,19 +26,33 @@ ShipChassis:
     modules: 1
     base_cost: 0
 ShipSystem:
-  Scrapper's Engine Mk 0:
-    base_cost: 0.0
-    component_cost: 1.0
-    movement_speed: 3.0
   Scrapper's Laser Mk 0:
-    base_cost: 0.0
+    base_cost: 1000.0
     hard_point_cost: 1.0
     attack_power: 3.0
     gather_power: 5.0
+  Scrapper's Laser Mk 1:
+    base_cost: 10000.0
+    hard_point_cost: 1.0
+    attack_power: 8.0
+    gather_power: 15.0
+  Scrapper's Laser Mk 2:
+    base_cost: 80000.0
+    hard_point_cost: 1.0
+    attack_power: 20.0
+    gather_power: 35.0
   Scrapper's Cargo Bay Mk 0:
-    base_cost: 0.0
+    base_cost: 10000.0
     module_cost: 1.0
     carry_capacity: 65.0
+  Scrapper's Cargo Bay Mk 1:
+    base_cost: 50000.0
+    module_cost: 1.0
+    carry_capacity: 200.0
+  Scrapper's Cargo Bay Mk 2:
+    base_cost: 250000.0
+    module_cost: 1.0
+    carry_capacity: 500.0
 Resources:
   food:
     base_cost: 10

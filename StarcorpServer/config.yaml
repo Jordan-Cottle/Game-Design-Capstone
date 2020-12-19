@@ -18,7 +18,7 @@ database:
   engine:
     url: sqlite:///starcorp.db
 game:
-  tick_duration: 10
+  tick_duration: 120
   static_data: /home/pi/Starcorp/Game-Design-Capstone/StarcorpServer/starcorp/data/game_data.yaml
   cities:
     starting_population: 100
@@ -38,6 +38,5 @@ game:
       location: -3,7,-4
       chassis: Minnow
       loadout:
-        - Scrapper's Engine Mk 0
         - Scrapper's Laser Mk 0
         - Scrapper's Cargo Bay Mk 0
