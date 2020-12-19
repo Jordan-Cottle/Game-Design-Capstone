@@ -172,7 +172,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e129ea14478cff4fa933d02cfe9f422, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _name: Gather Power
+  _name: ValueName
   _valuePrefix: 
   _integerFormat: 1
   NameLabel: {fileID: 8175822378787147946}

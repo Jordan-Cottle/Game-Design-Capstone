@@ -665,6 +665,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1107271629}
     m_Modifications:
+    - target: {fileID: 2506745383939389845, guid: 0c13742b9f1ba51498124ec13b3e6040, type: 3}
+      propertyPath: _name
+      value: Gather Power
+      objectReference: {fileID: 0}
     - target: {fileID: 5157029361587999970, guid: 0c13742b9f1ba51498124ec13b3e6040, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -773,6 +777,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1107271629}
     m_Modifications:
+    - target: {fileID: 1886855461922921651, guid: 5708d97eba9e5bd40a89e545a5873d5a, type: 3}
+      propertyPath: m_Text
+      value: WeaponName
+      objectReference: {fileID: 0}
     - target: {fileID: 1977820596970807975, guid: 5708d97eba9e5bd40a89e545a5873d5a, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -861,6 +869,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: WeaponUpgradeLabel
       objectReference: {fileID: 0}
+    - target: {fileID: 6176068660781042946, guid: 5708d97eba9e5bd40a89e545a5873d5a, type: 3}
+      propertyPath: SystemNameLabel
+      value: 
+      objectReference: {fileID: 458275698}
+    - target: {fileID: 6176068660781042946, guid: 5708d97eba9e5bd40a89e545a5873d5a, type: 3}
+      propertyPath: CostLabel
+      value: 
+      objectReference: {fileID: 458275697}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5708d97eba9e5bd40a89e545a5873d5a, type: 3}
 --- !u!224 &458275695 stripped
@@ -877,6 +893,28 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1e65993d9eeb32946b86eb033045885b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &458275697 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7504537316495211656, guid: 5708d97eba9e5bd40a89e545a5873d5a, type: 3}
+  m_PrefabInstance: {fileID: 458275694}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &458275698 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1886855461922921651, guid: 5708d97eba9e5bd40a89e545a5873d5a, type: 3}
+  m_PrefabInstance: {fileID: 458275694}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &477318121
@@ -2848,6 +2886,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: StorageUpgradeLabel
       objectReference: {fileID: 0}
+    - target: {fileID: 6176068660781042946, guid: 5708d97eba9e5bd40a89e545a5873d5a, type: 3}
+      propertyPath: CostLabel
+      value: 
+      objectReference: {fileID: 2095127324}
+    - target: {fileID: 6176068660781042946, guid: 5708d97eba9e5bd40a89e545a5873d5a, type: 3}
+      propertyPath: SystemNameLabel
+      value: 
+      objectReference: {fileID: 2095127325}
+    - target: {fileID: 6426368211100854997, guid: 5708d97eba9e5bd40a89e545a5873d5a, type: 3}
+      propertyPath: _name
+      value: Carry Capacity
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5708d97eba9e5bd40a89e545a5873d5a, type: 3}
 --- !u!224 &2095127322 stripped
@@ -2864,6 +2914,28 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1e65993d9eeb32946b86eb033045885b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2095127324 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7504537316495211656, guid: 5708d97eba9e5bd40a89e545a5873d5a, type: 3}
+  m_PrefabInstance: {fileID: 2095127321}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2095127325 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1886855461922921651, guid: 5708d97eba9e5bd40a89e545a5873d5a, type: 3}
+  m_PrefabInstance: {fileID: 2095127321}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &2106953726

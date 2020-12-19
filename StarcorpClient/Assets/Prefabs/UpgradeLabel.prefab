@@ -240,7 +240,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: WeaponName
+  m_Text: AttributeName
 --- !u!114 &6176068660781042946
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -254,8 +254,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _systemName: NullSystem
-  SystemNameLabel: {fileID: 0}
-  CostLabel: {fileID: 0}
+  SystemNameLabel: {fileID: 1886855461922921651}
+  CostLabel: {fileID: 7504537316495211656}
 --- !u!1 &7755328765028114927
 GameObject:
   m_ObjectHideFlags: 0
