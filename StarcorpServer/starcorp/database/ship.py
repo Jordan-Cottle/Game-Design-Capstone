@@ -81,3 +81,23 @@ def add_resources(session, resource, amount, ship):
     inventory_slot.amount += amount
 
     return inventory_slot.amount
+
+
+def get_upgrade(session, ship_system):
+    """ Locate the next direct upgrade of a system. """
+
+    name = ship_system.name
+
+    model, make = name.split("Mk")
+    make = int(make.strip())
+    model = model.strip()
+
+    models = session.query(ShipSystem).filter(ShipSystem.name.startswith(model)).all()
+
+    for upgrade_model in models:
+        if f"Mk {make+1}" in upgrade_model.name:
+            LOGGER.debug(f"{ship_system} upgrades into {upgrade_model}")
+            return upgrade_model
+
+    LOGGER.debug(f"No upgrade found for {ship_system}")
+    return None

@@ -37,4 +37,11 @@ from .world import (
     get_cost_of_resource,
     get_objects_in_sector,
 )
-from .ship import get_chassis, get_ship_system, create_ship, move_ship, add_resources
+from .ship import (
+    get_chassis,
+    get_ship_system,
+    create_ship,
+    move_ship,
+    add_resources,
+    get_upgrade,
+)
