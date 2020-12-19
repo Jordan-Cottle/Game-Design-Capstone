@@ -128,4 +128,12 @@ public class PlayerManager : MonoBehaviour
     {
         this.playerMoneyLabel.text = $"$ {this.playerMoney}";
     }
+
+    public void PurchaseUpgrade(string systemName)
+    {
+        Debug.Log($"Making request to upgrade {systemName}");
+        JObject data = new JObject();
+        data["system_name"] = systemName;
+        Socket.Emit("purchase_upgrade", data);
+    }
 }

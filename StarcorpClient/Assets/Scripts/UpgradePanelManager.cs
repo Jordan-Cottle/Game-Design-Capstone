@@ -8,8 +8,8 @@ public class UpgradePanelManager : MonoBehaviour
     public NumericLabel CarryCapacityLabel;
     public UpgradeOption WeaponUpgrade;
     public UpgradeOption StorageUpgrade;
-    // Start is called before the first frame update
 
+    public PlayerManager PlayerManager;
     private Vector3 _position;
     void Start()
     {
@@ -81,5 +81,19 @@ public class UpgradePanelManager : MonoBehaviour
 
         GatherPowerLabel.Value = totalGatherPower;
         CarryCapacityLabel.Value = totalCarryCapacity;
+    }
+
+    public void PurchaseUpgrade(string type)
+    {
+        if (type == "gather")
+        {
+            Debug.Log("Attempting to upgrade gather tool");
+            PlayerManager.PurchaseUpgrade(WeaponUpgrade.SystemName);
+        }
+        else if (type == "carry")
+        {
+            Debug.Log("Attempting to upgrade carry tool");
+            PlayerManager.PurchaseUpgrade(StorageUpgrade.SystemName);
+        }
     }
 }
