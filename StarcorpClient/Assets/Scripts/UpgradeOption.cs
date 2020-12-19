@@ -41,10 +41,9 @@ public class UpgradeOption : MonoBehaviour
         this._upgradeBonuses[attributeName] = bonus;
         var attributeLabel = this._attributeLabels[attributeName];
 
-        var bonusLabel = attributeLabel.transform.Find("UpgradeBoost").gameObject.GetComponent<Text>();
+        var bonusLabel = attributeLabel.transform.Find("CurrentValue/UpgradeBoost").gameObject.GetComponent<Text>();
 
         string prefix = bonus > 0 ? "+" : "-";
-
         bonusLabel.text = $"{prefix}{bonus}";
     }
 
@@ -60,14 +59,23 @@ public class UpgradeOption : MonoBehaviour
         _upgradeBonuses = new Dictionary<string, int>();
     }
 
-    void Initialize(JObject data)
+    public void Initialize(JObject data)
     {
-        int i = 0;
+        int i = 1;
         foreach (JObject attribute in data["attributes"])
         {
-            var label = transform.Find($"NumericLabel {i++}").GetComponent<NumericLabel>();
             string name = (string)attribute["name"];
-            _attributeLabels[name] = label;
+            if (name.Contains("gather") || name.Contains("carry"))
+            {
+                string childName = $"NumericLabel {i++}";
+                var label = transform.Find(childName).GetComponent<NumericLabel>();
+
+                _attributeLabels[name] = label;
+            }
+            else
+            {
+                Debug.Log($"Not initializing unsupported {name} for display");
+            }
         }
 
         UpdateLabels(data);
@@ -83,8 +91,16 @@ public class UpgradeOption : MonoBehaviour
         foreach (JObject attribute in data["attributes"])
         {
             string name = (string)attribute["name"];
-            SetAttributeValue(name, (int)attribute["value"]);
-            SetUpgradeBonus(name, (int)attribute["upgrade_bonus"]);
+            if (!_attributeLabels.ContainsKey(name))
+            {
+                Debug.Log($"Ignoring unsupported {name} for display");
+                continue;
+            }
+
+            int currentValue = (int)attribute["value"];
+            int upgradedValue = (int)attribute["upgraded_value"];
+            SetAttributeValue(name, currentValue);
+            SetUpgradeBonus(name, upgradedValue - currentValue);
         }
     }
 }

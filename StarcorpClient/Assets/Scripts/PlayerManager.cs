@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -91,6 +91,7 @@ public class PlayerManager : MonoBehaviour
         Socket.Register("player_load", (ev) =>
         {
             var data = ev.Data[0];
+            UpgradePanelManager.Initialize((JArray)data["systems"]);
             Position position = new Position((string)data["position"]);
 
             if (CityManager.cities.ContainsKey(position))
