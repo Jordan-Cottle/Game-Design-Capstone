@@ -12,6 +12,7 @@ public class PlayerManager : MonoBehaviour
     public ObjectManager ObjectManager;
     public CityManager CityManager;
     public CityPanelManager PanelManager;
+    public UpgradePanelManager UpgradePanelManager;
 
     private Socket Socket;
     private float playerMoney;
@@ -38,10 +39,12 @@ public class PlayerManager : MonoBehaviour
             if (CityManager.cities.ContainsKey(position))
             {
                 PanelManager.LoadCity(CityManager.cities[position]);
+                UpgradePanelManager.Show();
             }
             else
             {
                 PanelManager.Hide();
+                UpgradePanelManager.Hide();
             }
         });
 
@@ -93,10 +96,12 @@ public class PlayerManager : MonoBehaviour
             if (CityManager.cities.ContainsKey(position))
             {
                 PanelManager.LoadCity(CityManager.cities[position]);
+                UpgradePanelManager.Show();
             }
             else
             {
                 PanelManager.Hide();
+                UpgradePanelManager.Hide();
             }
         });
     }
