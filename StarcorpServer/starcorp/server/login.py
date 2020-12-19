@@ -28,7 +28,7 @@ from world import Coordinate
 
 LOGGER = get_logger(__name__)
 
-INACTIVE_TIMEOUT = 30
+INACTIVE_TIMEOUT = 3600  # one hour
 
 
 class UnauthorizedError(SocketIOEventError):
