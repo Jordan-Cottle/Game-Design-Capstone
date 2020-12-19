@@ -89,9 +89,9 @@ public class GameController : MonoBehaviour
                 this.ResourceManager.CreateResource((JObject)resource_node);
             }
 
-            this.socket.Emit("player_load");
         });
 
+        this.socket.Emit("player_load");
         this.socket.Emit("load_sector");
     }
 
