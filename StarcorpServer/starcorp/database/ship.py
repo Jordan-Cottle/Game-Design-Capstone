@@ -106,6 +106,17 @@ def get_upgrade(session, ship_system):
     return None
 
 
+def upgrade_component(session, ship, installed_base, upgrade):
+    """ Replace the base component with the upgraded version. """
+
+    new_system = ShipInstalledSystem(system_id=upgrade.id)
+    new_system.ship = ship
+    ship.loadout.remove(installed_base)
+    session.delete(installed_base)
+
+    ship.loadout.append(new_system)
+
+
 def get_systems(session, ship):
     """ Get all the systems, and the next upgrades, for a ship. """
 
