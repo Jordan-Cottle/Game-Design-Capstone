@@ -1,28 +1,31 @@
 """ Module for all events related to log in/out. """
 import json
+from collections import Counter
 from datetime import datetime, timedelta
 from functools import wraps
 
 import eventlet
+from flask import request, session
+from flask_socketio import emit
+
 from data import CONFIG, ShipSystemAttributeType
 from database import (
     DatabaseSession,
-    create_user,
-    login_user,
     create_ship,
+    create_user,
     get_location,
     get_upgrade,
+    login_user,
+    get_chassis,
+    get_ship_system,
+    get_sector,
 )
-from flask import request, session
-from flask_socketio import emit
-from database.ship import get_chassis, get_ship_system
-from database.world import get_sector
+from exceptions import SocketIOEventError
 from global_context import PLAYERS
+from server import app, socketio
 from utils import get_logger
 from world import Coordinate
 
-from server import app, socketio
-from exceptions import SocketIOEventError
 
 LOGGER = get_logger(__name__)
 
@@ -121,6 +124,7 @@ def create_initial_ship():
 def get_systems(ship):
     """ Get all the systems, and the next upgrades, for a ship. """
 
+    attribute_totals = Counter()
     systems = []
     for slot in ship.loadout:
 
@@ -146,9 +150,11 @@ def get_systems(ship):
                 "value": attribute.value,
                 "upgraded_value": upgraded_value,
             }
+            attribute_totals[attribute.type] += attribute.value
             attributes.append(attr_data)
 
         data["attributes"] = attributes
+        data.update(attribute_totals)
         systems.append(data)
 
     return systems
