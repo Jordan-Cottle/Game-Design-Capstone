@@ -152,6 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b00aa0b37ccdfbe42afc740c6f7ce44f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  userID: 
   ready: 0
 --- !u!4 &804010600
 Transform:
