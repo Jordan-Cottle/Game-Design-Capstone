@@ -1,6 +1,5 @@
 """ Module for all events related to log in/out. """
 import json
-from collections import Counter
 from datetime import datetime, timedelta
 from functools import wraps
 
@@ -8,13 +7,13 @@ import eventlet
 from flask import request, session
 from flask_socketio import emit
 
-from data import CONFIG, ShipSystemAttributeType
+from data import CONFIG
 from database import (
     DatabaseSession,
     create_ship,
     create_user,
     get_location,
-    get_upgrade,
+    get_systems,
     login_user,
     get_chassis,
     get_ship_system,
@@ -121,45 +120,6 @@ def create_initial_ship():
     return ship
 
 
-def get_systems(ship):
-    """ Get all the systems, and the next upgrades, for a ship. """
-
-    attribute_totals = Counter()
-    systems = []
-    for slot in ship.loadout:
-
-        upgrade = get_upgrade(database_session, slot.system)
-        if upgrade is not None:
-            upgrade_cost = upgrade.get_attribute(ShipSystemAttributeType.BASE_COST)
-        else:
-            upgrade_cost = -1
-
-        data = {
-            "name": slot.system.name,
-            "upgrade_cost": upgrade_cost,
-        }
-        attributes = []
-        for attribute in slot.system.attributes:
-            if upgrade is not None:
-                upgraded_value = upgrade.get_attribute(attribute.type)
-            else:
-                upgraded_value = -1
-
-            attr_data = {
-                "name": attribute.type,
-                "value": attribute.value,
-                "upgraded_value": upgraded_value,
-            }
-            attribute_totals[attribute.type] += attribute.value
-            attributes.append(attr_data)
-
-        data["attributes"] = attributes
-        data.update(attribute_totals)
-        systems.append(data)
-
-    return systems
-
-
 def login_required(func):
     """Decorator for enforcing a logged in user.
 
@@ -259,7 +219,7 @@ def load_player(message):  # pylint: disable=unused-argument
     ship_data = {"id": ship.id, "position": ship.location.coordinate}
     emit("player_joined", ship_data, broadcast=True, include_self=False)
 
-    ship_data["systems"] = get_systems(ship)
+    ship_data["systems"] = get_systems(database_session, ship)
     emit("player_load", ship_data)
 
 
