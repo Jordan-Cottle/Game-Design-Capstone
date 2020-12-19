@@ -44,5 +44,6 @@ from .ship import (
     move_ship,
     add_resources,
     get_upgrade,
+    upgrade_component,
     get_systems,
 )
