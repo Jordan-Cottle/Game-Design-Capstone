@@ -187,7 +187,7 @@ def socket_login(message):
     # Push user into the proxy object for later reference
     current_user.push(user)
 
-    LOGGER.info(f"{user} successfully logged in")
+    LOGGER.info(f"{user!r} successfully logged in")
     emit("login_accepted", user)
 
 
@@ -201,7 +201,7 @@ def load_player(message):  # pylint: disable=unused-argument
     for player in ACTIVE_PLAYERS:
         emit(
             "player_joined",
-            {"id": player.ship.id, "position": player.ship.location.coordinate},
+            {"id": player.id, "position": player.ship.location.coordinate},
         )
 
     assert (
@@ -216,7 +216,7 @@ def load_player(message):  # pylint: disable=unused-argument
 
     ACTIVE_PLAYERS.add(current_user.value)
 
-    ship_data = {"id": ship.id, "position": ship.location.coordinate}
+    ship_data = {"id": current_user.id, "position": ship.location.coordinate}
     emit("player_joined", ship_data, broadcast=True, include_self=False)
 
     ship_data["systems"] = get_systems(database_session, ship)
@@ -228,16 +228,12 @@ def load_player(message):  # pylint: disable=unused-argument
 def logout(message):
     """ Process logout of a player. """
 
-    LOGGER.info(f"Player logging out: {message}")
-    if not isinstance(message, dict):
-        message = json.loads(message)
+    LOGGER.info(f"Player logging out {current_user}: {current_user.id}")
 
-    player = PLAYERS.pop(current_user.id)
-    emit("player_logout", player.json, broadcast=True)
-
-    player.store(player.uuid)
+    emit("player_logout", current_user.id, broadcast=True)
 
     ACTIVE_PLAYERS.remove(current_user.value)
+    current_user.pop()
 
 
 @socketio.on("connect")
@@ -252,19 +248,15 @@ def on_connect():
 def on_disconnect():
     """ Handle sockets being disconnected. """
 
-    assert (
-        current_user.value not in ACTIVE_PLAYERS
-    ), "Players should be cleaned up prior to disconnecting"
-
     try:
         user_id = current_user.id
     except ProxyAccessError:
         LOGGER.debug("Disconnecting client that failed to log in.")
     else:
-        if user_id in PLAYERS:
-            player = PLAYERS[user_id]
-            emit("player_logout", player.json, broadcast=True)
-            player.store(player.uuid)
+        if current_user.value in ACTIVE_PLAYERS:
+            LOGGER.debug(f"Logging out {current_user.id} after disconnect")
+            emit("player_logout", user_id, broadcast=True)
+            ACTIVE_PLAYERS.remove(current_user.value)
             LOGGER.debug(f"{current_user} disconnected")
         else:
             LOGGER.debug(f"{current_user}'s player already removed from world")

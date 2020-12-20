@@ -32,7 +32,7 @@ class User(Base):
         """ Update last seen time. """
 
         self.last_seen = datetime.today()
-        LOGGER.debug(f"{self.name} ping at {self.last_seen.strftime('%H:%M:%S')}")
+        LOGGER.debug(f"{self!r} ping at {self.last_seen.strftime('%H:%M:%S')}")
 
     def __str__(self) -> str:
         return f"{self.name}"

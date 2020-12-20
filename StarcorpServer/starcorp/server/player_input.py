@@ -69,7 +69,7 @@ def move_player(message):
         LOGGER.debug(f"{ship} moved to {ship.location}")
         emit(
             "object_moved",
-            {"id": ship.id, "position": ship.location.coordinate},
+            {"id": current_user.id, "position": ship.location.coordinate},
             broadcast=True,
         )
 
