@@ -163,7 +163,7 @@ def sell_resource(message):
             city_slot = get_city_resource_slot(database_session, city, resource_type)
             ship_slot.amount -= volume
             city_slot.amount += volume
-            current_user.money += profit
+            current_user.value.money += profit
             database_session.commit()
 
             emit(
@@ -227,7 +227,7 @@ def buy_resource(message):
                 emit("purchase_denied", {"message": "Insufficient funds"})
                 continue
 
-            current_user.money -= cost
+            current_user.value.money -= cost
             city_slot.amount -= volume
             ship_slot.amount += volume
 
@@ -276,7 +276,7 @@ def handle_upgrade_purchase(message):
         )
         return
 
-    current_user.money -= upgrade_cost
+    current_user.value.money -= upgrade_cost
     upgrade_component(database_session, ship, installed_system, upgrade)
     database_session.commit()
 
